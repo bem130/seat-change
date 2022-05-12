@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Seat Change</title>
+        <meta charset="utf-8">
+    </head>
+    <body>
+        <div>
+            <p>席の定義</p>
+            <table>
+                <tr>
+                    <td>行</td>
+                    <td><input id="line" type="number" onchange="changeseat()"></td>
+                </tr>
+                <tr>
+                    <td>列</td>
+                    <td><input id="row" type="number" onchange="changeseat()"></td>
+                </tr>
+            </table>
+        </div>
+        <table id="result">
+        </table>
+    </body>
+</html>
+<script>
+    var line,row;
+
+    window.onload = function() {
+        row = Number(document.getElementById("row").value);
+        line = Number(document.getElementById("line").value);
+        makeseat();
+    }
+
+    function changeseat() {
+        row = Number(document.getElementById("row").value);
+        line = Number(document.getElementById("line").value);
+        makeseat();
+    }
+
+    function makeseat() {
+        let seattag = 0;
+        let table = document.createElement("table");
+        table.className = "seat";
+        table.id = "result";
+        for (let rcnt=0;rcnt<row;rcnt++) {
+            let tr = document.createElement("tr");
+            tr.className = "seat";
+            for (let lcnt=0;lcnt<line;lcnt++) {
+                seattag++;
+                let td = document.createElement("td");
+                let tag = document.createElement("p");
+                tag.className = "nomargin";
+                tag.innerHTML = seattag.toString();
+                td.appendChild(tag);
+                let name = document.createElement("p");
+                name.className = "nomargin";
+                name.innerHTML = "abc";
+                td.appendChild(name);
+                td.className = "seat";
+                tr.appendChild(td);
+            }
+            table.appendChild(tr);
+        }
+        document.getElementById("result").replaceWith(table);
+    }
+</script>
+<style>
+    table.seat {
+        margin: 10px;
+        border: 1px solid;
+    }
+    tr.seat {
+    }
+    td.seat {
+        margin: 0px;
+        border: 1px solid;
+    }
+    p.nomargin {
+        margin: 0px;
+        padding: 0px;
+    }
+</style>
