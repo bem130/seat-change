@@ -49,11 +49,11 @@
                 seattag++;
                 let td = document.createElement("td");
                 let tag = document.createElement("p");
-                tag.className = "nomargin";
+                tag.className = "nomargin tag";
                 tag.innerHTML = seattag.toString();
                 td.appendChild(tag);
                 let name = document.createElement("p");
-                name.className = "nomargin";
+                name.className = "nomargin name";
                 name.innerHTML = "abc";
                 td.appendChild(name);
                 td.className = "seat";
@@ -73,10 +73,18 @@
     }
     td.seat {
         margin: 0px;
+        padding: 5px 20px 5px 20px;
         border: 1px solid;
     }
     p.nomargin {
         margin: 0px;
         padding: 0px;
+    }
+    p.tag {
+        margin-left: -10px;
+        font-size: 20px;
+    }
+    p.name {
+        font-size: 30px;
     }
 </style>
