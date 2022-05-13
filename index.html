@@ -1,25 +1,30 @@
 <!DOCTYPE html>
-<html>
+<html moznomarginboxes mozdisallowselectionprint>
     <head>
         <title>Seat Change</title>
         <meta charset="utf-8">
     </head>
     <body>
+        <div class="noPrint">
+            <button onclick="print()">print</button>
+            <div>
+                <p>席の定義</p>
+                <table>
+                    <tr>
+                        <td>行</td>
+                        <td><input id="line" type="number" onchange="changeseat()"></td>
+                    </tr>
+                    <tr>
+                        <td>列</td>
+                        <td><input id="row" type="number" onchange="changeseat()"></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
         <div>
-            <p>席の定義</p>
-            <table>
-                <tr>
-                    <td>行</td>
-                    <td><input id="line" type="number" onchange="changeseat()"></td>
-                </tr>
-                <tr>
-                    <td>列</td>
-                    <td><input id="row" type="number" onchange="changeseat()"></td>
-                </tr>
+            <table id="result">
             </table>
         </div>
-        <table id="result">
-        </table>
     </body>
 </html>
 <script>
@@ -65,9 +70,15 @@
     }
 </script>
 <style>
+    @media print{
+        .noPrint{display:none;}
+        @page{size: auto;margin: 0;}
+    }
+
     table.seat {
-        margin: 10px;
         border: 1px solid;
+        margin: 10px auto;
+        max-width: 500px;
     }
     tr.seat {
     }
