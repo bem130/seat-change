@@ -12,22 +12,45 @@
                 <table>
                     <tr>
                         <td>行</td>
-                        <td><input id="line" type="number" onchange="changeseat()"></td>
+                        <td><input id="line" type="number" onchange="changeseat()" value="6"></td>
                     </tr>
                     <tr>
                         <td>列</td>
-                        <td><input id="row" type="number" onchange="changeseat()"></td>
+                        <td><input id="row" type="number" onchange="changeseat()" value="6"></td>
                     </tr>
                 </table>
             </div>
         </div>
-        <div>
-            <table id="result">
-            </table>
-        </div>
+        <center>
+            <div class="rarea">
+                <h1 class="title">席替えソフト自作話</h1>
+                <p class="front">Front</p>
+                <table id="result"></table>
+            </div>
+        </center>
     </body>
 </html>
 <script>
+
+    var member = {
+        0:"田中",
+        1:"高木",
+        2:"山田",
+        3:"鈴木",
+    }
+
+    function defseat() {
+        let seat = Array(row);
+        for (let r=0;r<row;r++) {
+            seat[r] = Array(line).fill(["","空席"]);
+        }
+        {
+            seat[Math.floor(Math.random()*row)][Math.floor(Math.random()*line)] = [1,"田中"];
+        }
+        console.table(seat);
+        return seat;
+    }
+
     var line,row;
 
     window.onload = function() {
@@ -43,6 +66,7 @@
     }
 
     function makeseat() {
+        let seat = defseat()
         let seattag = 0;
         let table = document.createElement("table");
         table.className = "seat";
@@ -55,11 +79,11 @@
                 let td = document.createElement("td");
                 let tag = document.createElement("p");
                 tag.className = "nomargin tag";
-                tag.innerHTML = seattag.toString();
+                tag.innerHTML = seat[rcnt][lcnt][0].toString();
                 td.appendChild(tag);
                 let name = document.createElement("p");
                 name.className = "nomargin name";
-                name.innerHTML = "abc";
+                name.innerHTML = seat[rcnt][lcnt][1];
                 td.appendChild(name);
                 td.className = "seat";
                 tr.appendChild(td);
@@ -76,16 +100,18 @@
     }
 
     table.seat {
-        border: 1px solid;
-        margin: 10px auto;
-        max-width: 500px;
-    }
-    tr.seat {
+        border: 1px solid grey;
+        border-radius: 5px;
+        margin: 10px;
+        padding: 2px;
+        width: 1000px;
     }
     td.seat {
         margin: 0px;
         padding: 5px 20px 5px 20px;
-        border: 1px solid;
+        border: 1px solid gray;
+        border-radius: 5px;
+        background-color: blanchedalmond;
     }
     p.nomargin {
         margin: 0px;
@@ -93,9 +119,28 @@
     }
     p.tag {
         margin-left: -10px;
+        margin-bottom: -5px;
         font-size: 20px;
+        height: 30px;
     }
     p.name {
         font-size: 30px;
+        text-align: center;
+    }
+    h1.title {
+        width: fit-content;
+        margin: 10px;
+        border-radius: 10px;
+        font-size: 50px;
+        margin-top: 30px;
+    }
+    p.front {
+        width: fit-content;
+        background-color: antiquewhite;
+        padding: 5px 50px 5px 50px;
+        border-radius: 10px;
+        margin: 0px;
+        margin-bottom: -5px;
+        margin-top: 100px;
     }
 </style>
