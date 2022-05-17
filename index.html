@@ -23,6 +23,7 @@
             </div>
             <div id="step2">
                 <p>人を追加</p>
+                <button onclick="addperson()">欄を追加</button>
                 <table>
                     <thead>
                         <tr>
@@ -32,24 +33,8 @@
                         </tr>
                     </thead>
                     <tbody id="people">
-                        <tr draggable="true">
-                            <td>1</td>
-                            <td><input id="line" type="text" placeholder="name"></td>
-                            <td><input type="checkbox"></td>
-                        </tr>
-                        <tr draggable="true">
-                            <td>2</td>
-                            <td><input id="line" type="text" placeholder="name"></td>
-                            <td><input type="checkbox"></td>
-                        </tr>
-                        <tr draggable="true">
-                            <td>3</td>
-                            <td><input id="line" type="text" placeholder="name"></td>
-                            <td><input type="checkbox"></td>
-                        </tr>
                     </tbody>
                 </table>
-                <button onclick="addperson()">欄を追加</button>
             </div>
         </div>
         <center>
@@ -70,6 +55,17 @@
         let td1 = document.createElement("td")
         td1.innerHTML = "0"
         tr.appendChild(td1)
+        let td2 = document.createElement("td")
+        let iarea = document.createElement("input")
+        iarea.type = "text"
+        iarea.placeholder = "name"
+        td2.appendChild(iarea)
+        tr.appendChild(td2)
+        let td3 = document.createElement("td")
+        let check = document.createElement("input")
+        check.type = "checkbox"
+        td3.appendChild(check)
+        tr.appendChild(td3)
         document.getElementById("people").appendChild(tr)
     }
 
