@@ -33,19 +33,59 @@
 <script>
 
     var member = {
-        0:"田中",
-        1:"高木",
-        2:"山田",
-        3:"鈴木",
+        1:"佐藤",
+        2:"鈴木",
+        3:"高橋",
+        4:"田中",
+        5:"渡辺",
+        6:"伊藤",
+        7:"中村",
+        8:"小林",
+        9:"山本",
+        10:"加藤",
+        11:"吉田",
+        12:"山田",
+        13:"佐々木",
+        14:"山口",
+        15:"松本",
+        16:"斎藤",
+        17:"井上",
+        18:"木村",
+        19:"林",
+        20:"清水",
+        21:"山崎",
+        22:"中島",
+        23:"森",
+        24:"阿部",
+        25:"池田",
+        26:"橋本",
+        27:"石川",
+        28:"斉藤",
+        29:"山下",
+        30:"小川",
     }
 
     function defseat() {
         let seat = Array(row);
         for (let r=0;r<row;r++) {
-            seat[r] = Array(line).fill(["","空席"]);
+            seat[r] = Array(line).fill([0,""]);
         }
         {
-            seat[Math.floor(Math.random()*row)][Math.floor(Math.random()*line)] = [1,"田中"];
+            memids = Object.keys(member)
+            if (memids.length>row*line) {
+                throw ("not enogh seats")
+                return seat
+            }
+            for (let m=0;m<memids.length;m++) {
+                let a=0;let b=0;
+                while (true) {
+                    a = Math.floor(Math.random()*row)
+                    b = Math.floor(Math.random()*line)
+                    if (seat[a][b][0]==0) break
+                }
+                seat[a][b] = [memids[m],member[memids[m]]];
+                console.log(seat[a][b],a,b)
+            }
         }
         console.table(seat);
         return seat;
@@ -76,17 +116,32 @@
             tr.className = "seat";
             for (let lcnt=0;lcnt<line;lcnt++) {
                 seattag++;
-                let td = document.createElement("td");
-                let tag = document.createElement("p");
-                tag.className = "nomargin tag";
-                tag.innerHTML = seat[rcnt][lcnt][0].toString();
-                td.appendChild(tag);
-                let name = document.createElement("p");
-                name.className = "nomargin name";
-                name.innerHTML = seat[rcnt][lcnt][1];
-                td.appendChild(name);
-                td.className = "seat";
-                tr.appendChild(td);
+                if (seat[rcnt][lcnt][0]=="0") {
+                    let td = document.createElement("td");
+                    let tag = document.createElement("p");
+                    tag.className = "nomargin tag empty";
+                    tag.innerHTML = "0";
+                    td.appendChild(tag);
+                    let name = document.createElement("p");
+                    name.className = "nomargin name empty";
+                    name.innerHTML = "空席";
+                    td.appendChild(name);
+                    td.className = "seat";
+                    tr.appendChild(td);
+                }
+                else {
+                    let td = document.createElement("td");
+                    let tag = document.createElement("p");
+                    tag.className = "nomargin tag";
+                    tag.innerHTML = seat[rcnt][lcnt][0].toString();
+                    td.appendChild(tag);
+                    let name = document.createElement("p");
+                    name.className = "nomargin name";
+                    name.innerHTML = seat[rcnt][lcnt][1];
+                    td.appendChild(name);
+                    td.className = "seat";
+                    tr.appendChild(td);
+                }
             }
             table.appendChild(tr);
         }
@@ -118,21 +173,26 @@
         padding: 0px;
     }
     p.tag {
+        color: black;
         margin-left: -10px;
         margin-bottom: -5px;
         font-size: 20px;
         height: 30px;
     }
     p.name {
+        color: black;
         font-size: 30px;
         text-align: center;
+    }
+    p.empty {
+        color: gray;
     }
     h1.title {
         width: fit-content;
         margin: 10px;
         border-radius: 10px;
         font-size: 50px;
-        margin-top: 30px;
+        margin-top: 20px;
     }
     p.front {
         width: fit-content;
