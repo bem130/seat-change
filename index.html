@@ -7,8 +7,8 @@
     <body>
         <div class="noPrint">
             <button onclick="print()">print</button>
-            <div>
-                
+            <progress id="step" max="5" value="1"></progress>
+            <div id="step1">
                 <p>席の定義</p>
                 <table>
                     <tr>
@@ -21,17 +21,57 @@
                     </tr>
                 </table>
             </div>
+            <div id="step2">
+                <p>人を追加</p>
+                <table>
+                    <thead>
+                        <tr>
+                            <td>出席番号</td>
+                            <td>名前</td>
+                            <td>前列</td>
+                        </tr>
+                    </thead>
+                    <tbody id="people">
+                        <tr draggable="true">
+                            <td>1</td>
+                            <td><input id="line" type="text" placeholder="name"></td>
+                            <td><input type="checkbox"></td>
+                        </tr>
+                        <tr draggable="true">
+                            <td>2</td>
+                            <td><input id="line" type="text" placeholder="name"></td>
+                            <td><input type="checkbox"></td>
+                        </tr>
+                        <tr draggable="true">
+                            <td>3</td>
+                            <td><input id="line" type="text" placeholder="name"></td>
+                            <td><input type="checkbox"></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <button onclick="addperson()">欄を追加</button>
+            </div>
         </div>
         <center>
-            <div class="rarea">
-                <h1 class="title">席替えソフト自作したい話</h1>
-                <p class="front">Front</p>
-                <table id="result"></table>
+            <div class="rareaframe">
+                <div class="rarea">
+                    <h1 class="title">席替えソフト自作したい話</h1>
+                    <p class="front">Front</p>
+                    <table id="result"></table>
+                </div>
             </div>
         </center>
     </body>
 </html>
 <script>
+
+    function addperson() {
+        let tr = document.createElement("tr")
+        let td1 = document.createElement("td")
+        td1.innerHTML = "0"
+        tr.appendChild(td1)
+        document.getElementById("people").appendChild(tr)
+    }
 
     var member = {
         1:"佐藤",
@@ -203,5 +243,11 @@
         margin: 0px;
         margin-bottom: -5px;
         margin-top: 100px;
+    }
+    div.rareaframe {
+        position: absolute;
+        top: 0px;
+        width: 100%;
+        right: 0px;
     }
 </style>
