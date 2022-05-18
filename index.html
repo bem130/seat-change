@@ -63,29 +63,29 @@
     function addperson() {
         pcnt++;
         let tr = document.createElement("tr")
-        let td1 = document.createElement("td")
-        let iid = document.createElement("input")
-        iid.type = "number"
-        iid.placeholder = "number"
-        iid.value = pcnt.toString()
-        td1.appendChild(iid)
-        tr.appendChild(td1)
-        let td2 = document.createElement("td")
-        let iarea = document.createElement("input")
-        iarea.type = "text"
-        iarea.placeholder = "name"
-        td2.appendChild(iarea)
-        tr.appendChild(td2)
-        let td3 = document.createElement("td")
-        let check = document.createElement("input")
-        check.type = "checkbox"
-        td3.appendChild(check)
-        tr.appendChild(td3)
-        document.getElementById("people").appendChild(tr)
+        let td1 = document.createElement("td");
+        let iid = document.createElement("input");
+        iid.type = "number";
+        iid.placeholder = "number";
+        iid.value = pcnt.toString();
+        td1.appendChild(iid);
+        tr.appendChild(td1);
+        let td2 = document.createElement("td");
+        let iarea = document.createElement("input");
+        iarea.type = "text";
+        iarea.placeholder = "name";
+        td2.appendChild(iarea);
+        tr.appendChild(td2);
+        let td3 = document.createElement("td");
+        let check = document.createElement("input");
+        check.type = "checkbox";
+        td3.appendChild(check);
+        tr.appendChild(td3);
+        document.getElementById("people").appendChild(tr);
     }
 
 
-    var member = []
+    var member = [];
 
     function defseat() {
         let seat = Array(row);
@@ -94,15 +94,15 @@
         }
         {
             if (member.length>row*line) {
-                throw ("not enogh seats")
-                return seat
+                throw ("not enogh seats");
+                return seat;
             }
             for (let m=0;m<member.length;m++) {
                 let a=0;let b=0;
                 while (true) {
-                    a = Math.floor(Math.random()*row)
-                    b = Math.floor(Math.random()*line)
-                    if (seat[a][b][0]==0) break
+                    a = Math.floor(Math.random()*row);
+                    b = Math.floor(Math.random()*line);
+                    if (seat[a][b][0]==0) break;
                 }
                 if (member[m][1].length>0) {
                     seat[a][b] = [member[m][0],member[m][1]];
@@ -110,7 +110,7 @@
                 else {
                     seat[a][b] = [0,"名無し"];
                 }
-                console.log(seat[a][b],a,b)
+                console.log(seat[a][b],a,b);
             }
         }
         return seat;
@@ -138,19 +138,14 @@
         let cell = table.querySelectorAll("tr");
         for (let c=0;c<cell.length;c++) {
             let elm = cell[c].querySelectorAll("input")
-
-            console.log(elm[0].value)
-            console.log(elm[1].value)
-            console.log(elm[2].value)
-
-            member.push([elm[0].value,elm[1].value,elm[2].value])
+            member.push([elm[0].value,elm[1].value,elm[2].value]);
         }
-        return member
+        return member;
     }
 
     function makeseat() {
-        let member = getmember()
-        let seat = defseat()
+        let member = getmember();
+        let seat = defseat();
         let seattag = 0;
         let table = document.createElement("table");
         table.className = "seat";
