@@ -45,6 +45,12 @@
                 </table>
             </div>
             <div id="step3">
+                <p>前列席の定義</p>
+                <button onclick="addfrontseat()">欄を追加</button>
+                <table id="frontseat">
+                </table>
+            </div>
+            <div id="step4">
                 <p>人を追加</p>
                 <button onclick="addperson()">欄を追加</button>
                 <table>
@@ -60,10 +66,10 @@
                     </tbody>
                 </table>
             </div>
-            <div id="step4">
+            <div id="step5">
                 <button onclick="makeseat()">生成</button>
             </div>
-            <div id="step5">
+            <div id="step6">
                 <button onclick="print()">print</button>
             </div>
         </div>
@@ -81,8 +87,35 @@
     </body>
 </html>
 <script>
-
     var pcnt=0;
+    var member = [];
+    var line,row;
+
+    function addfrontseat() {
+        let tr = document.createElement("tr");
+        let td1 = document.createElement("td");
+        let ix = document.createElement("input");
+        ix.type = "number";
+        ix.placeholder = "number";
+        ix.value = pcnt.toString();
+        td1.appendChild(ix);
+        tr.appendChild(td1);
+        let td2 = document.createElement("td");
+        let iy = document.createElement("input");
+        iy.type = "number";
+        iy.placeholder = "number";
+        iy.value = pcnt.toString();
+        td1.appendChild(iy);
+        tr.appendChild(td1);
+        let td3 = document.createElement("td");
+        let del = document.createElement("input");
+        del.onclick = function(e){e.explicitOriginalTarget.parentNode.parentNode.remove();showprop();};
+        del.type = "button";
+        del.value = "x"
+        td3.appendChild(del);
+        tr.appendChild(td3);
+        document.getElementById("frontseat").appendChild(tr);
+    }
     function addperson() {
         pcnt++;
         let tr = document.createElement("tr")
@@ -102,6 +135,7 @@
         let td3 = document.createElement("td");
         let check = document.createElement("input");
         check.type = "checkbox";
+        check.onchange = function() {showprop();};
         td3.appendChild(check);
         tr.appendChild(td3);
         let td4 = document.createElement("td");
@@ -117,44 +151,47 @@
 
     function showprop() {
         prop = document.getElementById("prop").querySelectorAll("td")
-        let table = document.getElementById("people").querySelectorAll("tr");
-        prop[1].innerHTML = row*line
-        prop[3].innerHTML = table.length
+        let people = document.getElementById("people").querySelectorAll("tr");
+        let front = 0;
+        for (let c=0;c<people.length;c++) {
+            if (people[c].querySelectorAll("input")[2].checked) {
+                front++;
+            }
+        }
+        prop[1].innerHTML = row*line;
+        prop[3].innerHTML = people.length;
         prop[5].innerHTML = 0
-        prop[7].innerHTML = 0
+        prop[7].innerHTML = front;
     }
 
-    var member = [];
-
     function defseat() {
-        let seat = Array(row);
+        let seating = Array(row);
         for (let r=0;r<row;r++) {
-            seat[r] = Array(line).fill([0,"空席",3]);
+            seating[r] = Array(line).fill([0,"空席",3]);
         }
         {
             if (member.length>row*line) {
                 throw ("not enogh seats");
-                return seat;
+                return seating;
             }
             for (let m=0;m<member.length;m++) {
                 let a=0;let b=0;
                 while (true) {
                     a = Math.floor(Math.random()*row);
                     b = Math.floor(Math.random()*line);
-                    if (seat[a][b][0]==0) break;
+                    if (seating[a][b][0]==0) break;
                 }
                 if (member[m][1].length>0) {
-                    seat[a][b] = [member[m][0],member[m][1],0];
+                    seating[a][b] = [member[m][0],member[m][1],0];
                 }
                 else {
-                    seat[a][b] = [0,"名無し",2];
+                    seating[a][b] = [0,"名無し",2];
                 }
             }
         }
-        return seat;
+        return seating;
     }
 
-    var line,row;
 
     window.onload = function() {
         row = Number(document.getElementById("row").value);
@@ -184,7 +221,7 @@
 
     function makeseat() {
         let member = getmember();
-        let seat = defseat();
+        let seating = defseat();
         let seattag = 0;
         let table = document.createElement("table");
         table.className = "seat";
@@ -194,7 +231,7 @@
             tr.className = "seat";
             for (let lcnt=0;lcnt<line;lcnt++) {
                 seattag++;
-                if (seat[rcnt][lcnt][0]=="0") {
+                if (seating[rcnt][lcnt][0]=="0") {
                     let td = document.createElement("td");
                     let tag = document.createElement("p");
                     tag.className = "nomargin tag empty";
@@ -202,7 +239,7 @@
                     td.appendChild(tag);
                     let name = document.createElement("p");
                     name.className = "nomargin name empty";
-                    name.innerHTML = seat[rcnt][lcnt][1];
+                    name.innerHTML = seating[rcnt][lcnt][1];
                     td.appendChild(name);
                     td.className = "seat";
                     tr.appendChild(td);
@@ -211,11 +248,11 @@
                     let td = document.createElement("td");
                     let tag = document.createElement("p");
                     tag.className = "nomargin tag";
-                    tag.innerHTML = seat[rcnt][lcnt][0].toString();
+                    tag.innerHTML = seating[rcnt][lcnt][0].toString();
                     td.appendChild(tag);
                     let name = document.createElement("p");
                     name.className = "nomargin name";
-                    name.innerHTML = seat[rcnt][lcnt][1];
+                    name.innerHTML = seating[rcnt][lcnt][1];
                     td.appendChild(name);
                     td.className = "seat";
                     tr.appendChild(td);
@@ -231,12 +268,18 @@
         .noPrint{display:none;}
         @page{size: auto;margin: 0;}
     }
+    ul {
+        list-style: none;
+        padding: 2px;
+    }
 
     div.control {
         background-color: rgba(173, 216, 230, 0.3);
         width: fit-content;
         padding: 50px;
         border-radius: 10px;
+        z-index: 1;
+        position: relative;
     }
     table.seat {
         margin: 10px;
@@ -252,6 +295,7 @@
         overflow: hidden;
         width: 1000px;
         padding: 10px;
+        min-height: max-content;
     }
     td.seat {
         margin: 0px;
@@ -300,6 +344,5 @@
         top: 0px;
         width: 100%;
         right: 0px;
-        z-index: -1;
     }
 </style>
