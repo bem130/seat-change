@@ -90,6 +90,7 @@
     var pcnt=0;
     var member = [];
     var line,row;
+    var seat = [];
 
     function addfrontseat() {
         let tr = document.createElement("tr");
@@ -98,6 +99,7 @@
         ix.type = "number";
         ix.placeholder = "number";
         ix.value = pcnt.toString();
+        ix.onchange = function() {showprop();};
         td1.appendChild(ix);
         tr.appendChild(td1);
         let td2 = document.createElement("td");
@@ -105,6 +107,7 @@
         iy.type = "number";
         iy.placeholder = "number";
         iy.value = pcnt.toString();
+        iy.onchange = function() {showprop();};
         td1.appendChild(iy);
         tr.appendChild(td1);
         let td3 = document.createElement("td");
@@ -150,21 +153,39 @@
     }
 
     function showprop() {
+        defseat();
         prop = document.getElementById("prop").querySelectorAll("td")
+        let table = document.getElementById("result").querySelectorAll("td");
         let people = document.getElementById("people").querySelectorAll("tr");
         let front = 0;
+        let fronts = 0
         for (let c=0;c<people.length;c++) {
             if (people[c].querySelectorAll("input")[2].checked) {
                 front++;
             }
         }
+        for (let ys=0;ys<seat.length;ys++) {
+            for (let xs=0;xs<seat[0].length;xs++) {
+                if (seat[ys][xs]==1) {
+                    if (table[ys*line+xs]!=null) {
+                        table[ys*line+xs].className = "seat frontseat"
+                    }
+                    fronts++;
+                }
+                else {
+                    if (table[ys*line+xs]!=null) {
+                        table[ys*line+xs].className = "seat"
+                    }
+                }
+            }
+        }
         prop[1].innerHTML = row*line;
         prop[3].innerHTML = people.length;
-        prop[5].innerHTML = 0
+        prop[5].innerHTML = fronts;
         prop[7].innerHTML = front;
     }
 
-    function defseat() {
+    function defseating() {
         let seating = Array(row);
         for (let r=0;r<row;r++) {
             seating[r] = Array(line).fill([0,"空席",3]);
@@ -190,6 +211,20 @@
             }
         }
         return seating;
+    }
+    function defseat() {
+        seat = Array(row);
+        for (let r=0;r<row;r++) {
+            seat[r] = Array(line).fill(0);
+        }
+        let table = document.getElementById("frontseat");
+        let cell = table.querySelectorAll("tr");
+        for (let c=0;c<cell.length;c++) {
+            let elm = cell[c].querySelectorAll("input")
+            if (seat[Number(elm[0].value)-1]!=null&&seat[Number(elm[0].value)-1][Number(elm[1].value)-1]!=null) {
+                seat[Number(elm[0].value)-1][Number(elm[1].value)-1] = 1;
+            }
+        }
     }
 
 
@@ -220,8 +255,9 @@
     }
 
     function makeseat() {
+        showprop();
         let member = getmember();
-        let seating = defseat();
+        let seating = defseating();
         let seattag = 0;
         let table = document.createElement("table");
         table.className = "seat";
@@ -231,6 +267,7 @@
             tr.className = "seat";
             for (let lcnt=0;lcnt<line;lcnt++) {
                 seattag++;
+                        console.log(seat[rcnt][lcnt],0)
                 if (seating[rcnt][lcnt][0]=="0") {
                     let td = document.createElement("td");
                     let tag = document.createElement("p");
@@ -242,6 +279,9 @@
                     name.innerHTML = seating[rcnt][lcnt][1];
                     td.appendChild(name);
                     td.className = "seat";
+                    if (seat[rcnt][lcnt]==1) {
+                        td.className = "seat frontseat";
+                    }
                     tr.appendChild(td);
                 }
                 else {
@@ -255,6 +295,9 @@
                     name.innerHTML = seating[rcnt][lcnt][1];
                     td.appendChild(name);
                     td.className = "seat";
+                    if (seat[rcnt][lcnt]==1) {
+                        td.className = "seat frontseat";
+                    }
                     tr.appendChild(td);
                 }
             }
@@ -303,6 +346,9 @@
         border: 1px solid gray;
         border-radius: 5px;
         background-color: blanchedalmond;
+    }
+    td.frontseat {
+        background-color: beige;
     }
     p.nomargin {
         margin: 0px;
