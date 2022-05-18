@@ -6,6 +6,26 @@
     </head>
     <body>
         <div class="noPrint control">
+            <div>
+                <table id="prop">
+                    <tr>
+                        <td>席の数</td>
+                        <td>0</td>
+                    </tr>
+                    <tr>
+                        <td>人の数</td>
+                        <td>0</td>
+                    </tr>
+                    <tr>
+                        <td>前列席の数</td>
+                        <td>0</td>
+                    </tr>
+                    <tr>
+                        <td>前列希望の人の数</td>
+                        <td>0</td>
+                    </tr>
+                </table>
+            </div>
             <progress id="step" max="5" value="1"></progress>
             <div id="step1">
                 <p>タイトルを定義</p>
@@ -86,14 +106,23 @@
         tr.appendChild(td3);
         let td4 = document.createElement("td");
         let del = document.createElement("input");
-        del.onclick = function(e){e.explicitOriginalTarget.parentNode.parentNode.remove();};
+        del.onclick = function(e){e.explicitOriginalTarget.parentNode.parentNode.remove();showprop();};
         del.type = "button";
         del.value = "x"
         td4.appendChild(del);
         tr.appendChild(td4);
         document.getElementById("people").appendChild(tr);
+        showprop();
     }
 
+    function showprop() {
+        prop = document.getElementById("prop").querySelectorAll("td")
+        let table = document.getElementById("people").querySelectorAll("tr");
+        prop[1].innerHTML = row*line
+        prop[3].innerHTML = table.length
+        prop[5].innerHTML = 0
+        prop[7].innerHTML = 0
+    }
 
     var member = [];
 
@@ -133,6 +162,7 @@
         line = Number(document.getElementById("line").value);
         changetitle();
         makeseat();
+        showprop();
     }
 
     function changetitle() {
@@ -248,7 +278,7 @@
         text-align: center;
     }
     p.empty {
-        color: gray;
+        color: rgb(158, 158, 158);
     }
     h1.title {
         width: fit-content;
