@@ -6,7 +6,6 @@
     </head>
     <body>
         <div class="noPrint control">
-            <button onclick="print()">print</button>
             <progress id="step" max="5" value="1"></progress>
             <div id="step1">
                 <p>タイトルを定義</p>
@@ -34,6 +33,7 @@
                             <td>出席番号</td>
                             <td>名前</td>
                             <td>前列</td>
+                            <td>削除</td>
                         </tr>
                     </thead>
                     <tbody id="people">
@@ -43,12 +43,15 @@
             <div id="step4">
                 <button onclick="makeseat()">生成</button>
             </div>
+            <div id="step5">
+                <button onclick="print()">print</button>
+            </div>
         </div>
         <center>
             <div class="rareaframe">
                 <div class="rarea">
                     <h1 class="title" id="title"></h1>
-                    <p class="front">Front</p>
+                    <p class="front">前</p>
                     <div class="rresize">
                         <table id="result"></table>
                     </div>
@@ -81,6 +84,13 @@
         check.type = "checkbox";
         td3.appendChild(check);
         tr.appendChild(td3);
+        let td4 = document.createElement("td");
+        let del = document.createElement("input");
+        del.onclick = function(e){e.explicitOriginalTarget.parentNode.parentNode.remove();};
+        del.type = "button";
+        del.value = "x"
+        td4.appendChild(del);
+        tr.appendChild(td4);
         document.getElementById("people").appendChild(tr);
     }
 
@@ -211,7 +221,7 @@
         display: block;
         resize: both;
         overflow: hidden;
-        width: 50%;
+        width: 1000px;
         padding: 10px;
     }
     td.seat {
@@ -230,7 +240,7 @@
         margin-left: -10px;
         margin-bottom: -5px;
         font-size: 20px;
-        height: 30px;
+        height: 25px;
     }
     p.name {
         color: black;
