@@ -5,10 +5,14 @@
         <meta charset="utf-8">
     </head>
     <body>
-        <div class="noPrint">
+        <div class="noPrint control">
             <button onclick="print()">print</button>
             <progress id="step" max="5" value="1"></progress>
             <div id="step1">
+                <p>タイトルを定義</p>
+                <input id="deftitle" type="text" onchange="changetitle()" onkeyup="changetitle()" value="○月の席">
+            </div>
+            <div id="step2">
                 <p>席の定義</p>
                 <table>
                     <tr>
@@ -21,7 +25,7 @@
                     </tr>
                 </table>
             </div>
-            <div id="step2">
+            <div id="step3">
                 <p>人を追加</p>
                 <button onclick="addperson()">欄を追加</button>
                 <table>
@@ -36,13 +40,18 @@
                     </tbody>
                 </table>
             </div>
+            <div id="step4">
+                <button onclick="makeseat()">生成</button>
+            </div>
         </div>
         <center>
             <div class="rareaframe">
                 <div class="rarea">
-                    <h1 class="title">席替えソフト自作したい話</h1>
+                    <h1 class="title" id="title"></h1>
                     <p class="front">Front</p>
-                    <table id="result"></table>
+                    <div class="rresize">
+                        <table id="result"></table>
+                    </div>
                 </div>
             </div>
         </center>
@@ -50,10 +59,16 @@
 </html>
 <script>
 
+    var pcnt=0;
     function addperson() {
+        pcnt++;
         let tr = document.createElement("tr")
         let td1 = document.createElement("td")
-        td1.innerHTML = "0"
+        let iid = document.createElement("input")
+        iid.type = "number"
+        iid.placeholder = "number"
+        iid.value = pcnt.toString()
+        td1.appendChild(iid)
         tr.appendChild(td1)
         let td2 = document.createElement("td")
         let iarea = document.createElement("input")
@@ -69,62 +84,35 @@
         document.getElementById("people").appendChild(tr)
     }
 
-    var member = {
-        1:"佐藤",
-        2:"鈴木",
-        3:"高橋",
-        4:"田中",
-        5:"渡辺",
-        6:"伊藤",
-        7:"中村",
-        8:"小林",
-        9:"山本",
-        10:"加藤",
-        11:"吉田",
-        12:"山田",
-        13:"佐々木",
-        14:"山口",
-        15:"松本",
-        16:"斎藤",
-        17:"井上",
-        18:"木村",
-        19:"林",
-        20:"清水",
-        21:"山崎",
-        22:"中島",
-        23:"森",
-        24:"阿部",
-        25:"池田",
-        26:"橋本",
-        27:"石川",
-        28:"斉藤",
-        29:"山下",
-        30:"小川",
-    }
+
+    var member = []
 
     function defseat() {
         let seat = Array(row);
         for (let r=0;r<row;r++) {
-            seat[r] = Array(line).fill([0,""]);
+            seat[r] = Array(line).fill([0,"空席"]);
         }
         {
-            memids = Object.keys(member)
-            if (memids.length>row*line) {
+            if (member.length>row*line) {
                 throw ("not enogh seats")
                 return seat
             }
-            for (let m=0;m<memids.length;m++) {
+            for (let m=0;m<member.length;m++) {
                 let a=0;let b=0;
                 while (true) {
                     a = Math.floor(Math.random()*row)
                     b = Math.floor(Math.random()*line)
                     if (seat[a][b][0]==0) break
                 }
-                seat[a][b] = [memids[m],member[memids[m]]];
+                if (member[m][1].length>0) {
+                    seat[a][b] = [member[m][0],member[m][1]];
+                }
+                else {
+                    seat[a][b] = [0,"名無し"];
+                }
                 console.log(seat[a][b],a,b)
             }
         }
-        console.table(seat);
         return seat;
     }
 
@@ -133,16 +121,35 @@
     window.onload = function() {
         row = Number(document.getElementById("row").value);
         line = Number(document.getElementById("line").value);
+        changetitle();
         makeseat();
     }
 
+    function changetitle() {
+        document.getElementById("title").innerHTML = document.getElementById("deftitle").value;
+    }
     function changeseat() {
         row = Number(document.getElementById("row").value);
         line = Number(document.getElementById("line").value);
-        makeseat();
+    }
+    function getmember() {
+        member = [];
+        let table = document.getElementById("people");
+        let cell = table.querySelectorAll("tr");
+        for (let c=0;c<cell.length;c++) {
+            let elm = cell[c].querySelectorAll("input")
+
+            console.log(elm[0].value)
+            console.log(elm[1].value)
+            console.log(elm[2].value)
+
+            member.push([elm[0].value,elm[1].value,elm[2].value])
+        }
+        return member
     }
 
     function makeseat() {
+        let member = getmember()
         let seat = defseat()
         let seattag = 0;
         let table = document.createElement("table");
@@ -161,7 +168,7 @@
                     td.appendChild(tag);
                     let name = document.createElement("p");
                     name.className = "nomargin name empty";
-                    name.innerHTML = "空席";
+                    name.innerHTML = seat[rcnt][lcnt][1];
                     td.appendChild(name);
                     td.className = "seat";
                     tr.appendChild(td);
@@ -191,12 +198,26 @@
         @page{size: auto;margin: 0;}
     }
 
+    div.control {
+        background-color: rgba(173, 216, 230, 0.3);
+        width: fit-content;
+        padding: 50px;
+        border-radius: 10px;
+    }
     table.seat {
-        border: 1px solid grey;
-        border-radius: 5px;
         margin: 10px;
         padding: 2px;
-        width: 1000px;
+        width: 100%;
+        height: 100%;
+        table-layout: fixed;
+    }
+    div.rresize {
+        border-radius: 5px;
+        display: block;
+        resize: both;
+        overflow: hidden;
+        width: 50%;
+        padding: 10px;
     }
     td.seat {
         margin: 0px;
@@ -229,7 +250,7 @@
         margin: 10px;
         border-radius: 10px;
         font-size: 50px;
-        margin-top: 20px;
+        margin-top: 100px;
     }
     p.front {
         width: fit-content;
@@ -238,7 +259,7 @@
         border-radius: 10px;
         margin: 0px;
         margin-bottom: -5px;
-        margin-top: 100px;
+        margin-top: 50px;
     }
     div.rareaframe {
         position: absolute;
