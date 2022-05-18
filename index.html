@@ -129,7 +129,7 @@
     function defseat() {
         let seat = Array(row);
         for (let r=0;r<row;r++) {
-            seat[r] = Array(line).fill([0,"空席"]);
+            seat[r] = Array(line).fill([0,"空席",3]);
         }
         {
             if (member.length>row*line) {
@@ -144,12 +144,11 @@
                     if (seat[a][b][0]==0) break;
                 }
                 if (member[m][1].length>0) {
-                    seat[a][b] = [member[m][0],member[m][1]];
+                    seat[a][b] = [member[m][0],member[m][1],0];
                 }
                 else {
-                    seat[a][b] = [0,"名無し"];
+                    seat[a][b] = [0,"名無し",2];
                 }
-                console.log(seat[a][b],a,b);
             }
         }
         return seat;
@@ -178,7 +177,7 @@
         let cell = table.querySelectorAll("tr");
         for (let c=0;c<cell.length;c++) {
             let elm = cell[c].querySelectorAll("input")
-            member.push([elm[0].value,elm[1].value,elm[2].value]);
+            member.push([elm[0].value,elm[1].value,elm[2].checked]);
         }
         return member;
     }
