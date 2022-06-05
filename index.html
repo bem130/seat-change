@@ -3,9 +3,16 @@
     <head>
         <title>Seat Change</title>
         <meta charset="utf-8">
+        <meta name="description" content="席替えソフト">
     </head>
     <body>
         <div class="noPrint control">
+            <div>
+                <h1>席替え</h1>
+            </div>
+            <div>
+                <button onclick="showpolicy()">方針</button>
+            </div>
             <div>
                 <table id="prop">
                     <tr>
@@ -71,6 +78,10 @@
             </div>
             <div id="step6">
                 <button onclick="print()">print</button>
+            </div>
+            <div id="policy" style="visibility: hidden;">
+                <button onclick="closepolicy()" id="closepolicy">閉じる</button>
+                <div id="contents"></div>
             </div>
         </div>
         <center>
@@ -306,6 +317,28 @@
         document.getElementById("result").replaceWith(table);
     }
 </script>
+<script>
+    
+let policy = `
+目標
+「公平で再現可能な席替え」
+`
+function showpolicy() {
+    let carea = document.getElementById("contents")
+    document.getElementById("policy").style.visibility = "visible"
+    let scs = policy.split("\n")
+    for (let i=0;i<scs.length;i++) {
+        let pel = document.createElement("p")
+        pel.innerHTML = scs[i]
+        carea.appendChild(pel)
+    }
+}
+function closepolicy() {
+    document.getElementById("policy").style.visibility = "hidden"
+    let carea = document.getElementById("contents")
+    carea.innerHTML = ""
+}
+</script>
 <style>
     @media print{
         .noPrint{display:none;}
@@ -390,5 +423,36 @@
         top: 0px;
         width: 100%;
         right: 0px;
+    }
+    table#prop {
+        padding: 5px;
+        margin: 0px;
+        border-radius: 2px;
+        background-color: rgba(217, 250, 215, 0.6);
+    }
+
+    button {
+        margin: 5px;
+        padding: 5px;
+    }
+
+    #policy {
+        border: 1px solid gray;
+        border-radius: 10px;
+        background-color: bisque;
+        position: fixed;
+        top: 100px;
+        left: 100px;
+        padding: 20px;
+        width: calc(100vw - 240px);
+        height: calc(100vh - 240px);
+        overflow: auto;
+        box-shadow: 2px 2px 5px black;
+    }
+
+    #closepolicy {
+        width: fit-content;
+        display: block;
+        margin: 0 0 0 auto;
     }
 </style>
