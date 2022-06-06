@@ -50,7 +50,13 @@
                         <td><input id="row" type="number" onchange="changeseat()" value="6"></td>
                     </tr>
                 </table>
-                <p>席をクリックで 前の席, 空席 , 席無し に変更できます</p>
+                <p>席をクリックで 通常の席 , 前の席 , 席無し に変更できます</p>
+                <ul>
+                    <li><button onclick="stype=1">通常の席を選択</button></li>
+                    <li><button onclick="stype=2">前の席を選択</button></li>
+                    <li><button onclick="stype=3">席が無いところを選択</button></li>
+                    <li><button onclick="stype=-1">未指定に戻すところを選択</button></li>
+                </ul>
             </div>
             <div id="step3">
                 <p>人を追加</p>
@@ -96,7 +102,43 @@
     var pcnt=0;
     var member = [];
     var line,row;
-    var seat = [];
+    var fseatplace = []
+    var rseatplace = []
+    var nseatplace = []
+    var fmember = []
+    var rmember = []
+    var stype = 0
+
+    function changesprop(id) {
+        id = Number(id)+1
+        console.log(id)
+        if (stype==-1) {
+            rseatplace = rseatplace.filter(itm=>itm!=id);
+            fseatplace = fseatplace.filter(itm=>itm!=id);
+            nseatplace = nseatplace.filter(itm=>itm!=id);
+        }
+        if (stype==1) {
+            if (!rseatplace.includes(id)) {
+                rseatplace.push(id)
+            }
+            fseatplace = fseatplace.filter(itm=>itm!=id);
+            nseatplace = nseatplace.filter(itm=>itm!=id);
+        }
+        if (stype==2) {
+            if (!fseatplace.includes(id)) {
+                fseatplace.push(id)
+            }
+            rseatplace = rseatplace.filter(itm=>itm!=id);
+            nseatplace = nseatplace.filter(itm=>itm!=id);
+        }
+        if (stype==3) {
+            if (!nseatplace.includes(id)) {
+                nseatplace.push(id)
+            }
+            fseatplace = fseatplace.filter(itm=>itm!=id);
+            rseatplace = rseatplace.filter(itm=>itm!=id);
+        }
+    }
 
     function addperson() {
         pcnt++;
@@ -145,16 +187,14 @@
 
     
     function defseating() {
-        seat = Array(row*line).fill(0);
-        let fseatn = 2
-        let rseatn = 2
+        let fseatn = fmember.length
+        let rseatn = rmember.length
         let otseatn = 5
-        fmember = [["1","太郎"],["2","花子"]]
-        rmember = [["3","次郎"],["4","三郎"]]
         fseat = Array(fseatn).fill([0,"空席",3])
         rseat = Array(rseatn).fill([0,"空席",3])
-        fseatplace = [7,2]
-        rseatplace = [4,5]
+        if ((fseatplace.length<fseatn||rseatplace.length<rseatn)&&(fseatn>0||rseatn>0)) {
+            throw("席が足りません")
+        }
         let seating = Array(row*line).fill([0,"空席",3]);
         { // f member
             for (let m=0;m<fmember.length;m++) {
@@ -164,7 +204,7 @@
                     if (fseat[a][2]==3) break;
                 }
                 if (fmember[m][1].length>0) {
-                    fseat[a] = [fmember[m][0],fmember[m][1],0];
+                    fseat[a] = [fmember[m][0],fmember[m][1],1];
                 }
                 else {
                     fseat[a] = [0,"名無し",2];
@@ -186,8 +226,10 @@
                 }
             }
         }
+        for (let m=0;m<nseatplace.length;m++) {
+            seating[nseatplace[m]-1] = [0,"席無し",4]
+        }
         for (let m=0;m<fseatn;m++) {
-            seat[fseatplace[m]-1] = 1
             seating[fseatplace[m]-1] = fseat[m]
         }
         for (let m=0;m<rseatn;m++) {
@@ -213,19 +255,24 @@
         line = Number(document.getElementById("line").value);
     }
     function getmember() {
-        member = [];
+        fmember = []
+        rmember = []
         let table = document.getElementById("people");
         let cell = table.querySelectorAll("tr");
         for (let c=0;c<cell.length;c++) {
             let elm = cell[c].querySelectorAll("input")
-            member.push([elm[0].value,elm[1].value,elm[2].checked]);
+            if (elm[2].checked) {
+                fmember.push([elm[0].value,elm[1].value]);
+            }
+            else {
+                rmember.push([elm[0].value,elm[1].value]);
+            }
         }
-        return member;
     }
 
     function makeseat() {
         showprop();
-        let member = getmember();
+        getmember();
         let seating = defseating();
         let seattag = 0;
         let table = document.createElement("table");
@@ -236,37 +283,33 @@
             tr.className = "seat";
             for (let lcnt=0;lcnt<line;lcnt++) {
                 seattag++;
-                        console.log(seat[rcnt*row+lcnt],"seat")
+                       // console.log(seating[rcnt*(row+1)+lcnt],"seat")
                 let td = document.createElement("td");
                 let tag = document.createElement("p");
-                if (seating[rcnt*row+lcnt][0]==0) {
-                    tag.className = "nomargin tag empty nopoint";
-                    tag.innerHTML = "0";
-                    td.appendChild(tag);
-                    let name = document.createElement("p");
-                    name.className = "nomargin name empty nopoint";
-                    name.innerHTML = seating[rcnt*row+lcnt][1];
-                    td.appendChild(name);
-                    td.className = "seat";
-                    if (seat[rcnt*row+lcnt]==1) {
-                        td.className = "seat frontseat";
-                    }
-                }
-                else {
+                {
                     tag.className = "nomargin tag nopoint";
-                    tag.innerHTML = seating[rcnt*row+lcnt][0].toString();
+                    tag.innerHTML = seating[rcnt*(row+1)+lcnt][0].toString();
                     td.appendChild(tag);
                     let name = document.createElement("p");
                     name.className = "nomargin name nopoint";
-                    name.innerHTML = seating[rcnt*row+lcnt][1];
+                    name.innerHTML = seating[rcnt*(row+1)+lcnt][1];
                     td.appendChild(name);
                     td.className = "seat";
-                    if (seat[rcnt*row+lcnt]==1) {
+                    if (seating[rcnt*(row+1)+lcnt][2]==1) {
                         td.className = "seat frontseat";
                     }
+                    if (seating[rcnt*(row+1)+lcnt][2]==3) {
+                        tag.className += " empty";
+                        name.className += " empty";
+                    }
+                    if (seating[rcnt*(row+1)+lcnt][2]==4) {
+                        td.className += " noseat";
+                        tag.className += " noseat";
+                        name.className += " noseat";
+                    }
                 }
-                td.dataset.seatid = (rcnt*row+lcnt).toString();
-                td.onclick = function(e){console.log(e.explicitOriginalTarget,e.explicitOriginalTarget.dataset.seatid)};
+                td.dataset.seatid = (rcnt*(row+1)+lcnt).toString();
+                td.onclick = function(e){changesprop(e.explicitOriginalTarget.dataset.seatid)};
                 tr.appendChild(td);
             }
             table.appendChild(tr);
@@ -342,6 +385,14 @@ function closepolicy() {
         padding: 2px 22px 8px 18px;
         border: 1px solid rgb(56, 53, 44);
     }
+    td.seat.noseat {
+        border: 1px solid rgba(255, 255, 255, 0);
+        background-color: rgba(255, 235, 205, 0.079);
+    }
+    td.seat.noseat:hover {
+        padding: 2px 22px 8px 18px;
+        border: 1px solid rgb(174, 170, 158);
+    }
 
     td.frontseat {
         background-color: beige;
@@ -364,6 +415,9 @@ function closepolicy() {
     }
     p.empty {
         color: rgb(158, 158, 158);
+    }
+    p.noseat {
+        color: rgba(255, 255, 255, 0);
     }
     h1.title {
         width: fit-content;
