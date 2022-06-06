@@ -220,6 +220,56 @@
         }
         return seating;
     }
+    
+    function defseating() {
+        let fseatn = 2
+        let rseatn = 2
+        let otseatn = 5
+        fmember = [["1","太郎"],["2","花子"]]
+        rmember = [["3","次郎"],["4","三郎"]]
+        fseat = Array(fseatn).fill([0,"空席",3])
+        rseat = Array(rseatn).fill([0,"空席",3])
+        fseatplace = [1,2]
+        rseatplace = [4,5]
+        let seating = Array(row*line).fill([0,"空席",3]);
+        { // f member
+            for (let m=0;m<fmember.length;m++) {
+                let a=0;
+                while (true) {
+                    a = Math.floor(Math.random()*fseatn);
+                    if (fseat[a][2]==3) break;
+                }
+                if (fmember[m][1].length>0) {
+                    fseat[a] = [fmember[m][0],fmember[m][1],0];
+                }
+                else {
+                    fseat[a] = [0,"名無し",2];
+                }
+            }
+        }
+        { // r member
+            for (let m=0;m<rmember.length;m++) {
+                let a=0;
+                while (true) {
+                    a = Math.floor(Math.random()*rseatn);
+                    if (rseat[a][2]==3) break;
+                }
+                if (rmember[m][1].length>0) {
+                    rseat[a] = [rmember[m][0],rmember[m][1],0];
+                }
+                else {
+                    rseat[a] = [0,"名無し",2];
+                }
+            }
+        }
+        for (let m=0;m<fseatn;m++) {
+            seating[fseatplace[m]-1] = fseat[m]
+        }
+        for (let m=0;m<rseatn;m++) {
+            seating[rseatplace[m]-1] = rseat[m]
+        }
+        return seating;
+    }
 
     function defseat() {
         seat = Array(row);
