@@ -50,14 +50,9 @@
                         <td><input id="row" type="number" onchange="changeseat()" value="6"></td>
                     </tr>
                 </table>
+                <p>席をクリックで 前の席, 空席 , 席無し に変更できます</p>
             </div>
             <div id="step3">
-                <p>前列席の定義</p>
-                <button onclick="addfrontseat()">欄を追加</button>
-                <table id="frontseat">
-                </table>
-            </div>
-            <div id="step4">
                 <p>人を追加</p>
                 <button onclick="addperson()">欄を追加</button>
                 <table>
@@ -73,10 +68,10 @@
                     </tbody>
                 </table>
             </div>
-            <div id="step5">
+            <div id="step4">
                 <button onclick="makeseat()">生成</button>
             </div>
-            <div id="step6">
+            <div id="step5">
                 <button onclick="print()">print</button>
             </div>
             <div id="policy" style="visibility: hidden;">
@@ -103,33 +98,6 @@
     var line,row;
     var seat = [];
 
-    function addfrontseat() {
-        let tr = document.createElement("tr");
-        let td1 = document.createElement("td");
-        let ix = document.createElement("input");
-        ix.type = "number";
-        ix.placeholder = "number";
-        ix.value = pcnt.toString();
-        ix.onchange = function() {showprop();};
-        td1.appendChild(ix);
-        tr.appendChild(td1);
-        let td2 = document.createElement("td");
-        let iy = document.createElement("input");
-        iy.type = "number";
-        iy.placeholder = "number";
-        iy.value = pcnt.toString();
-        iy.onchange = function() {showprop();};
-        td1.appendChild(iy);
-        tr.appendChild(td1);
-        let td3 = document.createElement("td");
-        let del = document.createElement("input");
-        del.onclick = function(e){e.explicitOriginalTarget.parentNode.parentNode.remove();showprop();};
-        del.type = "button";
-        del.value = "x"
-        td3.appendChild(del);
-        tr.appendChild(td3);
-        document.getElementById("frontseat").appendChild(tr);
-    }
     function addperson() {
         pcnt++;
         let tr = document.createElement("tr")
@@ -169,26 +137,6 @@
         let people = document.getElementById("people").querySelectorAll("tr");
         let front = 0;
         let fronts = 0
-        for (let c=0;c<people.length;c++) {
-            if (people[c].querySelectorAll("input")[2].checked) {
-                front++;
-            }
-        }
-        for (let ys=0;ys<row;ys++) {
-            for (let xs=0;xs<line;xs++) {
-                if (seat[ys*row+xs]==1) {
-                    if (table[ys*line+xs]!=null) {
-                        table[ys*line+xs].className = "seat frontseat"
-                    }
-                    fronts++;
-                }
-                else {
-                    if (table[ys*line+xs]!=null) {
-                        table[ys*line+xs].className = "seat"
-                    }
-                }
-            }
-        }
         prop[1].innerHTML = row*line;
         prop[3].innerHTML = people.length;
         prop[5].innerHTML = fronts;
@@ -289,38 +237,37 @@
             for (let lcnt=0;lcnt<line;lcnt++) {
                 seattag++;
                         console.log(seat[rcnt*row+lcnt],"seat")
-                if (seating[rcnt*row+lcnt][0]=="0") {
-                    let td = document.createElement("td");
-                    let tag = document.createElement("p");
-                    tag.className = "nomargin tag empty";
+                let td = document.createElement("td");
+                let tag = document.createElement("p");
+                if (seating[rcnt*row+lcnt][0]==0) {
+                    tag.className = "nomargin tag empty nopoint";
                     tag.innerHTML = "0";
                     td.appendChild(tag);
                     let name = document.createElement("p");
-                    name.className = "nomargin name empty";
+                    name.className = "nomargin name empty nopoint";
                     name.innerHTML = seating[rcnt*row+lcnt][1];
                     td.appendChild(name);
                     td.className = "seat";
                     if (seat[rcnt*row+lcnt]==1) {
                         td.className = "seat frontseat";
                     }
-                    tr.appendChild(td);
                 }
                 else {
-                    let td = document.createElement("td");
-                    let tag = document.createElement("p");
-                    tag.className = "nomargin tag";
+                    tag.className = "nomargin tag nopoint";
                     tag.innerHTML = seating[rcnt*row+lcnt][0].toString();
                     td.appendChild(tag);
                     let name = document.createElement("p");
-                    name.className = "nomargin name";
-                    name.innerHTML = seating[rcnt*row+lcnt][1];
+                    name.className = "nomargin name nopoint";
+                    name.innerHTML = seating[rcnt*row+lcnt+1][1];
                     td.appendChild(name);
                     td.className = "seat";
                     if (seat[rcnt*row+lcnt]==1) {
                         td.className = "seat frontseat";
                     }
-                    tr.appendChild(td);
                 }
+                td.dataset.seatid = (rcnt*row+lcnt).toString();
+                td.onclick = function(e){console.log(e.explicitOriginalTarget,e.explicitOriginalTarget.dataset.seatid)};
+                tr.appendChild(td);
             }
             table.appendChild(tr);
         }
@@ -374,6 +321,7 @@ function closepolicy() {
         height: 100%;
         table-layout: fixed;
     }
+
     div.rresize {
         border-radius: 5px;
         display: block;
@@ -390,6 +338,11 @@ function closepolicy() {
         border-radius: 5px;
         background-color: blanchedalmond;
     }
+    td.seat:hover {
+        padding: 2px 22px 8px 18px;
+        border: 1px solid rgb(56, 53, 44);
+    }
+
     td.frontseat {
         background-color: beige;
     }
@@ -439,6 +392,10 @@ function closepolicy() {
         margin: 0px;
         border-radius: 2px;
         background-color: rgba(217, 250, 215, 0.6);
+    }
+
+    .nopoint {
+        pointer-events: none;
     }
 
     button {
