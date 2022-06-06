@@ -197,10 +197,7 @@
     }
 
     function defseating() {
-        let seating = Array(row);
-        for (let r=0;r<row;r++) {
-            seating[r] = Array(line).fill([0,"空席",3]);
-        }
+        let seating = Array(row*line).fill([0,"空席",3]);
         {
             if (member.length>row*line) {
                 throw ("not enogh seats");
@@ -211,18 +208,19 @@
                 while (true) {
                     a = Math.floor(Math.random()*row);
                     b = Math.floor(Math.random()*line);
-                    if (seating[a][b][0]==0) break;
+                    if (seating[a*row+b][0]==0) break;
                 }
                 if (member[m][1].length>0) {
-                    seating[a][b] = [member[m][0],member[m][1],0];
+                    seating[a*row+b] = [member[m][0],member[m][1],0];
                 }
                 else {
-                    seating[a][b] = [0,"名無し",2];
+                    seating[a*row+b] = [0,"名無し",2];
                 }
             }
         }
         return seating;
     }
+
     function defseat() {
         seat = Array(row);
         for (let r=0;r<row;r++) {
@@ -279,7 +277,7 @@
             for (let lcnt=0;lcnt<line;lcnt++) {
                 seattag++;
                         console.log(seat[rcnt][lcnt],0)
-                if (seating[rcnt][lcnt][0]=="0") {
+                if (seating[rcnt*row+lcnt][0]=="0") {
                     let td = document.createElement("td");
                     let tag = document.createElement("p");
                     tag.className = "nomargin tag empty";
@@ -287,7 +285,7 @@
                     td.appendChild(tag);
                     let name = document.createElement("p");
                     name.className = "nomargin name empty";
-                    name.innerHTML = seating[rcnt][lcnt][1];
+                    name.innerHTML = seating[rcnt*row+lcnt][1];
                     td.appendChild(name);
                     td.className = "seat";
                     if (seat[rcnt][lcnt]==1) {
@@ -299,11 +297,11 @@
                     let td = document.createElement("td");
                     let tag = document.createElement("p");
                     tag.className = "nomargin tag";
-                    tag.innerHTML = seating[rcnt][lcnt][0].toString();
+                    tag.innerHTML = seating[rcnt*row+lcnt][0].toString();
                     td.appendChild(tag);
                     let name = document.createElement("p");
                     name.className = "nomargin name";
-                    name.innerHTML = seating[rcnt][lcnt][1];
+                    name.innerHTML = seating[rcnt*row+lcnt][1];
                     td.appendChild(name);
                     td.className = "seat";
                     if (seat[rcnt][lcnt]==1) {
