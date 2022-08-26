@@ -10,86 +10,56 @@
             <div>
                 <h1>席替え</h1>
             </div>
-            <div>
-                <button onclick="showpolicy()">方針</button>
-            </div>
-            <div>
-                <table id="prop" style="visibility: hidden">
-                    <tr>
-                        <td>席の数</td>
-                        <td>0</td>
-                    </tr>
-                    <tr>
-                        <td>人の数</td>
-                        <td>0</td>
-                    </tr>
-                    <tr>
-                        <td>前列席の数</td>
-                        <td>0</td>
-                    </tr>
-                    <tr>
-                        <td>前列希望の人の数</td>
-                        <td>0</td>
-                    </tr>
-                </table>
-            </div>
-            <progress id="step" max="5" value="1"></progress>
             <div id="step1">
-                <p>タイトルを定義</p>
-                <input id="deftitle" type="text" onchange="changetitle()" onkeyup="changetitle()" value="○月の席">
+                <button onclick="localfile()">読み込み</button>
             </div>
             <div id="step2">
-                <p>席の定義</p>
-                <table>
-                    <tr>
-                        <td>行</td>
-                        <td><input id="line" type="number" onchange="changeseat()" value="6"></td>
-                    </tr>
-                    <tr>
-                        <td>列</td>
-                        <td><input id="row" type="number" onchange="changeseat()" value="6"></td>
-                    </tr>
-                </table>
-                <p>席をクリックで 通常の席 , 前の席 , 席無し に変更できます</p>
-                <ul>
-                    <li><button onclick="stype=1">通常の席を選択</button></li>
-                    <li><button onclick="stype=2">前の席を選択</button></li>
-                    <li><button onclick="stype=3">席が無いところを選択</button></li>
-                    <li><button onclick="stype=-1">未指定に戻すところを選択</button></li>
-                </ul>
+                <button onclick="makeseating()">生成</button>
             </div>
             <div id="step3">
-                <p>人を追加</p>
-                <button onclick="addperson()">欄を追加</button>
-                <table>
-                    <thead>
-                        <tr>
-                            <td>出席番号</td>
-                            <td>名前</td>
-                            <td>前列</td>
-                            <td>削除</td>
-                        </tr>
-                    </thead>
-                    <tbody id="people">
-                    </tbody>
-                </table>
+                タイトルを編集<br>
+                <input id="deftitle" type="text" onchange="changetitle()" onkeyup="changetitle()">
             </div>
             <div id="step4">
-                <button onclick="makeseat()">生成</button>
-            </div>
-            <div id="step5">
                 <button onclick="print()">print</button>
             </div>
             <div id="policy" style="visibility: hidden;">
                 <button onclick="closepolicy()" id="closepolicy">閉じる</button>
                 <div id="contents"></div>
             </div>
+            <div>
+                <button onclick="showpolicy()">方針</button>
+            </div>
+        </div>
+        <div class="noPrint fileinfo">
+            <table border style="width: 250px;">
+                <tr>
+                    <td>タイトル</td>
+                    <td id="infotitle"></td>
+                </tr>
+                <tr>
+                    <td>席の数</td>
+                    <td id="infoseatarg"></td>
+                </tr>
+                <tr>
+                    <td>人の数</td>
+                    <td id="infopeople"></td>
+                </tr>
+                <tr>
+                    <td>前の人の数</td>
+                    <td id="infopeoplefront"></td>
+                </tr>
+                <tr>
+                    <td>後ろの人の数</td>
+                    <td id="infopeoplerear"></td>
+                </tr>
+            </table>
         </div>
         <center>
             <div class="rareaframe">
-                <div class="rarea">
+                <div class="rarea" id="rarea" style="visibility: hidden;">
                     <h1 class="title" id="title"></h1>
-                    <p class="front">前</p>
+                    <p class="front" id="front">前</p>
                     <div class="rresize">
                         <table id="result"></table>
                     </div>
@@ -99,229 +69,285 @@
     </body>
 </html>
 <script>
-    var pcnt=0;
-    var member = [];
-    var line,row;
-    var fseatplace = []
-    var rseatplace = []
-    var nseatplace = []
-    var fmember = []
-    var rmember = []
-    var stype = 0
 
-    function changesprop(id) {
-        id = Number(id)+1
-        console.log(id)
-        if (stype==-1) {
-            rseatplace = rseatplace.filter(itm=>itm!=id);
-            fseatplace = fseatplace.filter(itm=>itm!=id);
-            nseatplace = nseatplace.filter(itm=>itm!=id);
+let filedata = null;
+
+random = Math.random; // 乱数の生成に用いる関数
+
+function localfile() {
+    ifelm = document.createElement("input");
+    ifelm.type = "file";
+    ifelm.onchange = function (input) {
+        let reader = new FileReader();
+        reader.onload = function () {
+            loadfile(reader.result);
         }
-        if (stype==1) {
-            if (!rseatplace.includes(id)) {
-                rseatplace.push(id)
-            }
-            fseatplace = fseatplace.filter(itm=>itm!=id);
-            nseatplace = nseatplace.filter(itm=>itm!=id);
-        }
-        if (stype==2) {
-            if (!fseatplace.includes(id)) {
-                fseatplace.push(id)
-            }
-            rseatplace = rseatplace.filter(itm=>itm!=id);
-            nseatplace = nseatplace.filter(itm=>itm!=id);
-        }
-        if (stype==3) {
-            if (!nseatplace.includes(id)) {
-                nseatplace.push(id)
-            }
-            fseatplace = fseatplace.filter(itm=>itm!=id);
-            rseatplace = rseatplace.filter(itm=>itm!=id);
+        reader.readAsText(input.target.files[0]);
+    };
+    ifelm.click();
+}
+async function samplefile() {
+    let res = await fetch(`./sample/draft.txt`, {method: "GET"});
+    let data = await res.text();
+    loadfile(data);
+}
+
+// samplefile();
+
+function loadfile(text) {
+    let retdatas = {};
+    let data = text.split("\r\n");
+    let ncdata = [];
+    for (let i=0;i<data.length;i++) {
+        if (data[i][0]!=";") {
+            ncdata.push(data[i]);
         }
     }
-
-    function addperson() {
-        pcnt++;
-        let tr = document.createElement("tr")
-        let td1 = document.createElement("td");
-        let iid = document.createElement("input");
-        iid.type = "number";
-        iid.placeholder = "number";
-        iid.value = pcnt.toString();
-        td1.appendChild(iid);
-        tr.appendChild(td1);
-        let td2 = document.createElement("td");
-        let iarea = document.createElement("input");
-        iarea.type = "text";
-        iarea.placeholder = "name";
-        td2.appendChild(iarea);
-        tr.appendChild(td2);
-        let td3 = document.createElement("td");
-        let check = document.createElement("input");
-        check.type = "checkbox";
-        check.onchange = function() {showprop();};
-        td3.appendChild(check);
-        tr.appendChild(td3);
-        let td4 = document.createElement("td");
-        let del = document.createElement("input");
-        del.onclick = function(e){e.explicitOriginalTarget.parentNode.parentNode.remove();showprop();};
-        del.type = "button";
-        del.value = "x"
-        td4.appendChild(del);
-        tr.appendChild(td4);
-        document.getElementById("people").appendChild(tr);
-        showprop();
+    let blocks = {
+        "nsc": [],
+        "template": [],
+        "seat": [],
+        "member": [],
     }
-
-    function showprop() {
-        prop = document.getElementById("prop").querySelectorAll("td")
-        let table = document.getElementById("result").querySelectorAll("td");
-        let people = document.getElementById("people").querySelectorAll("tr");
-        let front = 0;
-        let fronts = 0
-        prop[1].innerHTML = row*line;
-        prop[3].innerHTML = people.length;
-        prop[5].innerHTML = fronts;
-        prop[7].innerHTML = front;
+    let blocksconf = {
+        "nsc": "",
+        "template": "",
+        "seat": "",
+        "member": "",
     }
-
-
-    function defseating() {
-        let fseatn = fmember.length
-        let rseatn = rmember.length
-        let otseatn = 5
-        fseat = Array(fseatn).fill([0,"空席",3])
-        rseat = Array(rseatn).fill([0,"空席",3])
-        if ((fseatplace.length<fseatn||rseatplace.length<rseatn)&&(fseatn>0||rseatn>0)) {
-            throw("席が足りません")
+    let blocksname = Object.keys(blocks);
+    let nblock = "";
+    let nblockconf = "";
+    for (let i=0;i<ncdata.length;i++) {
+        if (ncdata[i][0]=="!") {
+            let tblock = ncdata[i].slice(1).split(" ");
+            nblock = tblock[0];
+            nblockconf = tblock[1];
+            if (nblockconf!=null&&nblockconf.length>0&&blocksname.indexOf(nblock)!=-1) {
+                blocksconf[nblock] = nblockconf;
+            }
+            continue;
         }
-        let seating = Array(row*line).fill([0,"空席",3]);
-        { // f member
-            for (let m=0;m<fmember.length;m++) {
-                let a=0;
-                while (true) {
-                    a = Math.floor(Math.random()*fseatn);
-                    if (fseat[a][2]==3) break;
-                }
-                if (fmember[m][1].length>0) {
-                    fseat[a] = [fmember[m][0],fmember[m][1],1];
-                }
-                else {
-                    fseat[a] = [0,"名無し",2];
-                }
+        if (blocksname.indexOf(nblock)!=-1) {
+            blocks[nblock].push(ncdata[i]);
+        }
+    }
+    {// template
+        let bdata = {
+            "title": "",
+        }
+        let bdatasname = Object.keys(bdata);
+        for (let i=0;i<blocks.template.length;i++) {
+            let bdatas = (blocks.template[i]).split(",");
+            if (bdatasname.indexOf(bdatas[0])!=-1) {
+                bdata[bdatas[0]] = bdatas[1];
             }
         }
-        { // r member
-            for (let m=0;m<rmember.length;m++) {
-                let a=0;
-                while (true) {
-                    a = Math.floor(Math.random()*rseatn);
-                    if (rseat[a][2]==3) break;
-                }
-                if (rmember[m][1].length>0) {
-                    rseat[a] = [rmember[m][0],rmember[m][1],0];
-                }
-                else {
-                    rseat[a] = [0,"名無し",2];
+        retdatas.title = bdata.title;
+    }
+    {// seat
+        let seatarg = [0,0];
+        let tseatarg = blocksconf.seat.split("x");
+        let frontseat = 0
+        let rearseat = 0
+        seatarg[0] = Math.floor(Number(tseatarg[0]));
+        seatarg[1] = Math.floor(Number(tseatarg[1]));
+        let seatarray = new Uint8ClampedArray(seatarg[0]*seatarg[1]);
+        if (seatarg[1]!=blocks.seat.length) {
+            console.error("defined size doesn't match");
+            return false;
+        }
+        for (let i=0;i<blocks.seat.length;i++) {
+            let bdatas = blocks.seat[i];
+            if (seatarg[0]!=bdatas.length) {
+                console.error("defined size doesn't match");
+                return false;
+            }
+            for (let x=0;x<seatarg[0];x++) {
+                let ii = i*seatarg[0]+x;
+                let tseat = Number(bdatas[x]);
+                switch (tseat) {
+                    case 0:
+                        rearseat++;
+                        seatarray[ii] = 0;
+                        break;
+                    case 1:
+                        frontseat++;
+                        seatarray[ii] = 1;
+                        break;
+                    case 2:
+                        seatarray[ii] = 2;
+                        break;
+                    case 3:
+                        seatarray[ii] = 3;
+                        break;
+                    default:
+                        console.error(`not defined seat ${bdatas[x]}`)
+                        break;
                 }
             }
         }
-        for (let m=0;m<nseatplace.length;m++) {
-            seating[nseatplace[m]-1] = [0,"席無し",4]
+        retdatas.frontseat = frontseat;
+        retdatas.rearseat = rearseat;
+        retdatas.seatarg = seatarg;
+        retdatas.seatarray = seatarray;
+    }
+    {// member
+        let conf = blocksconf.member.split(",");
+        if (conf.indexOf("front")==-1) {
+            console.error("front member aren't defined");
+            return false;
         }
-        for (let m=0;m<fseatn;m++) {
-            seating[fseatplace[m]-1] = fseat[m]
-        }
-        for (let m=0;m<rseatn;m++) {
-            seating[rseatplace[m]-1] = rseat[m]
-        }
-        return seating;
-    }
-
-
-    window.onload = function() {
-        row = Number(document.getElementById("row").value);
-        line = Number(document.getElementById("line").value);
-        changetitle();
-        makeseat();
-        showprop();
-    }
-
-    function changetitle() {
-        document.getElementById("title").innerHTML = document.getElementById("deftitle").value;
-    }
-    function changeseat() {
-        row = Number(document.getElementById("row").value);
-        line = Number(document.getElementById("line").value);
-    }
-    function getmember() {
-        fmember = []
-        rmember = []
-        let table = document.getElementById("people");
-        let cell = table.querySelectorAll("tr");
-        for (let c=0;c<cell.length;c++) {
-            let elm = cell[c].querySelectorAll("input")
-            if (elm[2].checked) {
-                fmember.push([elm[0].value,elm[1].value]);
+        let frontmember = [];
+        let rearmember = [];
+        for (let i=0;i<blocks.member.length;i++) {
+            let pdata = blocks.member[i].split(",");
+            let frontflag = Number(pdata[conf.indexOf("front")]);
+            if (frontflag==0) {
+                rearmember.push([pdata[0],pdata[1]]);
             }
-            else {
-                rmember.push([elm[0].value,elm[1].value]);
+            else if (frontflag==1) {
+                frontmember.push([pdata[0],pdata[1]]);
             }
         }
+        retdatas.front = frontmember;
+        retdatas.rear = rearmember;
     }
+    console.log(retdatas);
+    filedata = retdatas;
+    showdata(filedata);
+}
 
-    function makeseat() {
-        showprop();
-        getmember();
-        let seating = defseating();
-        let seattag = 0;
-        let table = document.createElement("table");
-        table.className = "seat";
-        table.id = "result";
-        for (let rcnt=0;rcnt<row;rcnt++) {
-            let tr = document.createElement("tr");
-            tr.className = "seat";
-            for (let lcnt=0;lcnt<line;lcnt++) {
-                seattag++;
-                       // console.log(seating[rcnt*(row+1)+lcnt],"seat")
-                let td = document.createElement("td");
-                let tag = document.createElement("p");
-                {
-                    tag.className = "nomargin tag nopoint";
-                    tag.innerHTML = seating[rcnt*(row+1)+lcnt][0].toString();
-                    td.appendChild(tag);
-                    let name = document.createElement("p");
-                    name.className = "nomargin name nopoint";
-                    name.innerHTML = seating[rcnt*(row+1)+lcnt][1];
-                    td.appendChild(name);
-                    td.className = "seat";
-                    if (seating[rcnt*(row+1)+lcnt][2]==1) {
-                        td.className = "seat frontseat";
-                    }
-                    if (seating[rcnt*(row+1)+lcnt][2]==3) {
-                        tag.className += " empty";
-                        name.className += " empty";
-                    }
-                    if (seating[rcnt*(row+1)+lcnt][2]==4) {
-                        td.className += " noseat";
-                        tag.className += " noseat";
-                        name.className += " noseat";
-                    }
+function showdata(data) {
+    document.getElementById("infotitle").innerHTML = `${data.title}`;
+    document.getElementById("infoseatarg").innerHTML = `${data.seatarg[0]}x${data.seatarg[1]}`;
+    document.getElementById("infopeople").innerHTML = `${data.front.length+data.rear.length}`;
+    document.getElementById("infopeoplefront").innerHTML = `${data.front.length}`;
+    document.getElementById("infopeoplerear").innerHTML = `${data.rear.length}`;
+}
+
+function makeseating() {
+    let data = filedata;
+    if (data==null) {
+        console.error("no file loaded");
+        return false;
+    }
+    if (data.frontseat<data.front.length) {
+        console.error("not enough front seats");
+        return false;
+    }
+    if (data.rearseat<data.rear.length) {
+        console.error("not enough rear seats");
+        return false;
+    }
+    let seating = Array(data.seatarg[0]*data.seatarg[1]);
+    for (let i=0;i<seating.length;i++) {
+        seating[i] = ["Null","空席",data.seatarray[i]]
+    }
+    let frontadrs = []
+    let rearadrs = []
+    for (let i=0;i<data.seatarray.length;i++) {
+        if (data.seatarray[i]==1) {
+            frontadrs.push(i);
+        }
+        else if (data.seatarray[i]==0) {
+            rearadrs.push(i);
+        }
+    }
+    for (let p=0;p<data.front.length;p++) { // front seats
+        console.log(data.front[p])
+        while (true) {
+            let aadr = Math.floor(random()*frontadrs.length);
+            if (frontadrs[aadr]!=-1) {
+                seating[frontadrs[aadr]][0] = data.front[p][0];
+                seating[frontadrs[aadr]][1] = data.front[p][1];
+                frontadrs[aadr] = -1;
+                break;
+            }
+        }
+    }
+    for (let p=0;p<data.rear.length;p++) { // rear seats
+        console.log(data.rear[p])
+        while (true) {
+            let aadr = Math.floor(random()*rearadrs.length);
+            if (rearadrs[aadr]!=-1) {
+                seating[rearadrs[aadr]][0] = data.rear[p][0];
+                seating[rearadrs[aadr]][1] = data.rear[p][1];
+                rearadrs[aadr] = -1;
+                break;
+            }
+        }
+    }
+    console.log(frontadrs,rearadrs);
+    console.log(seating);
+    showresult(seating,data);
+}
+
+
+function showresult(seating,data) {
+    let seattag = 0;
+    let table = document.createElement("table");
+    table.className = "seat";
+    table.id = "result";
+    for (let rcnt=0;rcnt<data.seatarg[1];rcnt++) {
+        let tr = document.createElement("tr");
+        tr.className = "seat";
+        for (let lcnt=0;lcnt<data.seatarg[0];lcnt++) {
+            let tseat = seating[rcnt*data.seatarg[0]+lcnt];
+            seattag++;
+            let td = document.createElement("td");
+            let tag = document.createElement("p");
+            {
+                tag.className = "nomargin tag nopoint";
+                tag.innerHTML = tseat[0].toString();
+                td.appendChild(tag);
+                let name = document.createElement("p");
+                name.className = "nomargin name nopoint";
+                name.innerHTML = tseat[1];
+                td.appendChild(name);
+                td.className = "seat";
+                if (seating[rcnt*(data.seatarg[0])+lcnt][2]==3) {
+                    td.className += " noseat";
+                    tag.className += " noseat";
+                    name.className += " noseat";
                 }
-                td.dataset.seatid = (rcnt*(row+1)+lcnt).toString();
-                td.onclick = function(e){changesprop(e.explicitOriginalTarget.dataset.seatid)};
-                tr.appendChild(td);
+                else if (seating[rcnt*(data.seatarg[0])+lcnt][0]=="Null") {
+                    tag.className += " noseat";
+                    name.className += " noseat";
+                }
             }
-            table.appendChild(tr);
+            td.dataset.seatid = (rcnt*(data.seatarg[0]+1)+lcnt).toString();
+            tr.appendChild(td);
         }
-        document.getElementById("result").replaceWith(table);
+        table.appendChild(tr);
     }
+    document.getElementById("rarea").style.visibility = "visible";
+    document.getElementById("deftitle").value = replacetitle(data.title);
+    changetitle();
+    document.getElementById("result").replaceWith(table);
+}
+
+function replacetitle(title) {
+    let date = new Date();
+    return title
+        .replace(/\%year\%/g, date.getFullYear())
+        .replace(/\%month\%/g, date.getMonth()+1)
+        .replace(/\%day\%/g, date.getDate())
+}
+function changetitle() {
+    document.getElementById("title").innerHTML = document.getElementById("deftitle").value;
+}
+
 </script>
 <script>
     
 let policy = `
 目標
-「公平で再現可能な席替え」
+「公平かつ簡単な席替え」
+席替えはできる限り公平でなくてはならない
+しかし、公平にするためだとしても、面倒になるのはよくない
+
+疑似乱数を用いて、非常にランダム かつ 検証もしやすい 席替えを目指しました
 `
 function showpolicy() {
     let carea = document.getElementById("contents")
@@ -349,6 +375,10 @@ function closepolicy() {
         padding: 2px;
     }
 
+    .fileinfo {
+        margin: 20px;
+    }
+
     div.control {
         background-color: rgba(173, 216, 230, 0.3);
         width: fit-content;
@@ -368,7 +398,6 @@ function closepolicy() {
     div.rresize {
         border-radius: 5px;
         display: block;
-        resize: both;
         overflow: hidden;
         width: 1000px;
         padding: 10px;
@@ -381,22 +410,11 @@ function closepolicy() {
         border-radius: 5px;
         background-color: blanchedalmond;
     }
-    td.seat:hover {
-        padding: 2px 22px 8px 18px;
-        border: 1px solid rgb(56, 53, 44);
-    }
     td.seat.noseat {
         border: 1px solid rgba(255, 255, 255, 0);
         background-color: rgba(255, 235, 205, 0.079);
     }
-    td.seat.noseat:hover {
-        padding: 2px 22px 8px 18px;
-        border: 1px solid rgb(174, 170, 158);
-    }
 
-    td.frontseat {
-        background-color: beige;
-    }
     p.nomargin {
         margin: 0px;
         padding: 0px;
@@ -418,6 +436,9 @@ function closepolicy() {
     }
     p.noseat {
         color: rgba(255, 255, 255, 0);
+    }
+    p.tag.noseat,empty {
+        visibility: hidden;
     }
     h1.title {
         width: fit-content;
