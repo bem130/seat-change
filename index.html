@@ -4,6 +4,7 @@
         <title>Seat Change</title>
         <meta charset="utf-8">
         <meta name="description" content="席替えソフト">
+        <script src="xorshift.js"></script>
     </head>
     <body>
         <div class="noPrint control">
@@ -12,6 +13,11 @@
             </div>
             <div id="step1">
                 <button onclick="localfile()">読み込み</button>
+            </div>
+            <div id="step2">
+                シード値<br>
+                <input id="useseed" type="checkbox">
+                <input id="rseed" type="number" value="21856">
             </div>
             <div id="step2">
                 <button onclick="makeseating()">生成</button>
@@ -55,6 +61,14 @@
                 </tr>
             </table>
         </div>
+        <div class="noPrint report">
+            <table border style="width: 250px;">
+                <tr>
+                    <td>シード値</td>
+                    <td id="repseed"></td>
+                </tr>
+            </table>
+        </div>
         <center>
             <div class="rareaframe">
                 <div class="rarea" id="rarea" style="visibility: hidden;">
@@ -72,7 +86,18 @@
 
 let filedata = null;
 
-random = Math.random; // 乱数の生成に用いる関数
+let xors = new rnum.Xorshift();
+let ranodmseed = function() {
+    let seed = Date.now();
+    if (document.getElementById("useseed").checked) {
+        seed = Math.floor(Number(document.getElementById("rseed").value));
+    }
+    console.log("seed:",seed);
+    xors.seed(seed);
+}
+let random = function() {
+    return xors.rnd()%256/256;
+}
 
 function localfile() {
     ifelm = document.createElement("input");
@@ -213,7 +238,6 @@ function loadfile(text) {
         retdatas.front = frontmember;
         retdatas.rear = rearmember;
     }
-    console.log(retdatas);
     filedata = retdatas;
     showdata(filedata);
 }
@@ -227,6 +251,7 @@ function showdata(data) {
 }
 
 function makeseating() {
+    ranodmseed(); // set seed
     let data = filedata;
     if (data==null) {
         console.error("no file loaded");
@@ -255,7 +280,6 @@ function makeseating() {
         }
     }
     for (let p=0;p<data.front.length;p++) { // front seats
-        console.log(data.front[p])
         while (true) {
             let aadr = Math.floor(random()*frontadrs.length);
             if (frontadrs[aadr]!=-1) {
@@ -267,7 +291,6 @@ function makeseating() {
         }
     }
     for (let p=0;p<data.rear.length;p++) { // rear seats
-        console.log(data.rear[p])
         while (true) {
             let aadr = Math.floor(random()*rearadrs.length);
             if (rearadrs[aadr]!=-1) {
@@ -278,8 +301,6 @@ function makeseating() {
             }
         }
     }
-    console.log(frontadrs,rearadrs);
-    console.log(seating);
     showresult(seating,data);
 }
 
