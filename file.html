@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html moznomarginboxes mozdisallowselectionprint>
+    <head>
+        <title>Seat Change</title>
+        <meta charset="utf-8">
+        <meta name="description" content="席替えソフト">
+    </head>
+    <body>
+        <div class="noPrint control">
+            <div>
+                <h1>席替え</h1>
+            </div>
+            <div>
+                <button onclick="showpolicy()">方針</button>
+            </div>
+            <div id="step1">
+                <button onclick="">読み込み</button>
+            </div>
+            <div id="step2">
+                <button onclick="makeseat()">生成</button>
+            </div>
+            <div id="step3">
+                <button onclick="print()">print</button>
+            </div>
+            <div id="policy" style="visibility: hidden;">
+                <button onclick="closepolicy()" id="closepolicy">閉じる</button>
+                <div id="contents"></div>
+            </div>
+        </div>
+        <center>
+            <div class="rareaframe">
+                <div class="rarea">
+                    <h1 class="title" id="title"></h1>
+                    <p class="front">前</p>
+                    <div class="rresize">
+                        <table id="result"></table>
+                    </div>
+                </div>
+            </div>
+        </center>
+    </body>
+</html>
+<script>
+
+    window.onload = function() {
+    }
+
+</script>
+<script>
+    
+let policy = `
+目標
+「公平で再現可能な席替え」
+`
+function showpolicy() {
+    let carea = document.getElementById("contents")
+    document.getElementById("policy").style.visibility = "visible"
+    let scs = policy.split("\n")
+    for (let i=0;i<scs.length;i++) {
+        let pel = document.createElement("p")
+        pel.innerHTML = scs[i]
+        carea.appendChild(pel)
+    }
+}
+function closepolicy() {
+    document.getElementById("policy").style.visibility = "hidden"
+    let carea = document.getElementById("contents")
+    carea.innerHTML = ""
+}
+</script>
+<style>
+    @media print{
+        .noPrint{display:none;}
+        @page{size: auto;margin: 0;}
+    }
+    ul {
+        list-style: none;
+        padding: 2px;
+    }
+
+    div.control {
+        background-color: rgba(173, 216, 230, 0.3);
+        width: fit-content;
+        padding: 50px;
+        border-radius: 10px;
+        z-index: 1;
+        position: relative;
+    }
+    table.seat {
+        margin: 10px;
+        padding: 2px;
+        width: 100%;
+        height: 100%;
+        table-layout: fixed;
+    }
+
+    div.rresize {
+        border-radius: 5px;
+        display: block;
+        resize: both;
+        overflow: hidden;
+        width: 1000px;
+        padding: 10px;
+        min-height: max-content;
+    }
+    td.seat {
+        margin: 0px;
+        padding: 5px 20px 5px 20px;
+        border: 1px solid gray;
+        border-radius: 5px;
+        background-color: blanchedalmond;
+    }
+    td.seat:hover {
+        padding: 2px 22px 8px 18px;
+        border: 1px solid rgb(56, 53, 44);
+    }
+    td.seat.noseat {
+        border: 1px solid rgba(255, 255, 255, 0);
+        background-color: rgba(255, 235, 205, 0.079);
+    }
+    td.seat.noseat:hover {
+        padding: 2px 22px 8px 18px;
+        border: 1px solid rgb(174, 170, 158);
+    }
+
+    td.frontseat {
+        background-color: beige;
+    }
+    p.nomargin {
+        margin: 0px;
+        padding: 0px;
+    }
+    p.tag {
+        color: black;
+        margin-left: -10px;
+        margin-bottom: -5px;
+        font-size: 20px;
+        height: 25px;
+    }
+    p.name {
+        color: black;
+        font-size: 30px;
+        text-align: center;
+    }
+    p.empty {
+        color: rgb(158, 158, 158);
+    }
+    p.noseat {
+        color: rgba(255, 255, 255, 0);
+    }
+    h1.title {
+        width: fit-content;
+        margin: 10px;
+        border-radius: 10px;
+        font-size: 50px;
+        margin-top: 100px;
+    }
+    p.front {
+        width: fit-content;
+        background-color: antiquewhite;
+        padding: 5px 50px 5px 50px;
+        border-radius: 10px;
+        margin: 0px;
+        margin-bottom: -5px;
+        margin-top: 50px;
+    }
+    div.rareaframe {
+        position: absolute;
+        top: 0px;
+        width: 100%;
+        right: 0px;
+    }
+    table#prop {
+        padding: 5px;
+        margin: 0px;
+        border-radius: 2px;
+        background-color: rgba(217, 250, 215, 0.6);
+    }
+
+    .nopoint {
+        pointer-events: none;
+    }
+
+    button {
+        margin: 5px;
+        padding: 5px;
+    }
+
+    #policy {
+        border: 1px solid gray;
+        border-radius: 10px;
+        background-color: rgba(238, 255, 250, 0.9);
+        position: fixed;
+        top: 100px;
+        left: 100px;
+        padding: 20px;
+        width: calc(100vw - 240px);
+        height: calc(100vh - 240px);
+        overflow: auto;
+        box-shadow: 2px 2px 5px black;
+    }
+
+    #closepolicy {
+        width: fit-content;
+        display: block;
+        margin: 0 0 0 auto;
+    }
+</style>
