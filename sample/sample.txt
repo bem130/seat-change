@@ -1,6 +1,8 @@
 !nsc
 !template
 title,%month%月の席
+seed,165316
+useseed,0
 !seat 6x6
 ; 0:席
 ; 1:前側の席

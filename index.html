@@ -17,7 +17,7 @@
             <div id="step2">
                 シード値<br>
                 <input id="useseed" type="checkbox">
-                <input id="rseed" type="number" value="21856">
+                <input id="rseed" type="number" value="0">
             </div>
             <div id="step2">
                 <button onclick="makeseating()">生成</button>
@@ -67,6 +67,10 @@
                     <td>シード値</td>
                     <td id="repseed"></td>
                 </tr>
+                <tr>
+                    <td>生成時刻</td>
+                    <td id="reptime"></td>
+                </tr>
             </table>
         </div>
         <center>
@@ -88,12 +92,12 @@ let filedata = null;
 
 let xors = new rnum.Xorshift();
 let ranodmseed = function() {
-    let seed = Date.now();
+    let seed = new Date().getTime();
     if (document.getElementById("useseed").checked) {
         seed = Math.floor(Number(document.getElementById("rseed").value));
     }
-    console.log("seed:",seed);
     xors.seed(seed);
+    return seed;
 }
 let random = function() {
     return xors.rnd()%256/256;
@@ -250,8 +254,16 @@ function showdata(data) {
     document.getElementById("infopeoplerear").innerHTML = `${data.rear.length}`;
 }
 
+function makereport(data) {
+    document.getElementById("repseed").innerHTML = `${data.seed}`;
+    document.getElementById("reptime").innerHTML = `${data.startTime}`;
+}
+
 function makeseating() {
-    ranodmseed(); // set seed
+    gendata = {};
+    gendata.startTime = Date.now();
+    let seed = ranodmseed(); // set seed
+    gendata.seed = seed;
     let data = filedata;
     if (data==null) {
         console.error("no file loaded");
@@ -267,7 +279,7 @@ function makeseating() {
     }
     let seating = Array(data.seatarg[0]*data.seatarg[1]);
     for (let i=0;i<seating.length;i++) {
-        seating[i] = ["Null","空席",data.seatarray[i]]
+        seating[i] = ["Null","空席",data.seatarray[i]];
     }
     let frontadrs = []
     let rearadrs = []
@@ -302,6 +314,8 @@ function makeseating() {
         }
     }
     showresult(seating,data);
+    gendata.endTime = Date.now();
+    makereport(gendata);
 }
 
 
@@ -398,6 +412,11 @@ function closepolicy() {
 
     .fileinfo {
         margin: 20px;
+        position: relative;
+    }
+    .report {
+        margin: 20px;
+        position: relative;
     }
 
     div.control {
@@ -416,6 +435,9 @@ function closepolicy() {
         table-layout: fixed;
     }
 
+    div.rarea,div.rareaframe {
+        pointer-events: none;
+    }
     div.rresize {
         border-radius: 5px;
         display: block;
