@@ -10,28 +10,56 @@
             <div>
                 <h1>席替え</h1>
             </div>
-            <div>
-                <button onclick="showpolicy()">方針</button>
-            </div>
             <div id="step1">
-                <button onclick="">読み込み</button>
+                <button onclick="localfile()">読み込み</button>
             </div>
             <div id="step2">
-                <button onclick="makeseat()">生成</button>
+                <button onclick="makeseating()">生成</button>
             </div>
             <div id="step3">
+                タイトルを編集<br>
+                <input id="deftitle" type="text" onchange="changetitle()" onkeyup="changetitle()">
+            </div>
+            <div id="step4">
                 <button onclick="print()">print</button>
             </div>
             <div id="policy" style="visibility: hidden;">
                 <button onclick="closepolicy()" id="closepolicy">閉じる</button>
                 <div id="contents"></div>
             </div>
+            <div>
+                <button onclick="showpolicy()">方針</button>
+            </div>
+        </div>
+        <div class="noPrint fileinfo">
+            <table border style="width: 250px;">
+                <tr>
+                    <td>タイトル</td>
+                    <td id="infotitle"></td>
+                </tr>
+                <tr>
+                    <td>席の数</td>
+                    <td id="infoseatarg"></td>
+                </tr>
+                <tr>
+                    <td>人の数</td>
+                    <td id="infopeople"></td>
+                </tr>
+                <tr>
+                    <td>前の人の数</td>
+                    <td id="infopeoplefront"></td>
+                </tr>
+                <tr>
+                    <td>後ろの人の数</td>
+                    <td id="infopeoplerear"></td>
+                </tr>
+            </table>
         </div>
         <center>
             <div class="rareaframe">
-                <div class="rarea">
+                <div class="rarea" id="rarea" style="visibility: hidden;">
                     <h1 class="title" id="title"></h1>
-                    <p class="front">前</p>
+                    <p class="front" id="front">前</p>
                     <div class="rresize">
                         <table id="result"></table>
                     </div>
@@ -41,6 +69,8 @@
     </body>
 </html>
 <script>
+
+let filedata = null;
 
 random = Math.random; // 乱数の生成に用いる関数
 
@@ -56,13 +86,13 @@ function localfile() {
     };
     ifelm.click();
 }
-async function serverfile() {
+async function samplefile() {
     let res = await fetch(`./sample/draft.txt`, {method: "GET"});
     let data = await res.text();
     loadfile(data);
 }
 
-serverfile();
+// samplefile();
 
 function loadfile(text) {
     let retdatas = {};
@@ -184,10 +214,24 @@ function loadfile(text) {
         retdatas.rear = rearmember;
     }
     console.log(retdatas);
-    makeseating(retdatas);
+    filedata = retdatas;
+    showdata(filedata);
 }
 
-function makeseating(data) {
+function showdata(data) {
+    document.getElementById("infotitle").innerHTML = `${data.title}`;
+    document.getElementById("infoseatarg").innerHTML = `${data.seatarg[0]}x${data.seatarg[1]}`;
+    document.getElementById("infopeople").innerHTML = `${data.front.length+data.rear.length}`;
+    document.getElementById("infopeoplefront").innerHTML = `${data.front.length}`;
+    document.getElementById("infopeoplerear").innerHTML = `${data.rear.length}`;
+}
+
+function makeseating() {
+    let data = filedata;
+    if (data==null) {
+        console.error("no file loaded");
+        return false;
+    }
     if (data.frontseat<data.front.length) {
         console.error("not enough front seats");
         return false;
@@ -262,15 +306,12 @@ function showresult(seating,data) {
                 name.innerHTML = tseat[1];
                 td.appendChild(name);
                 td.className = "seat";
-                if (seating[rcnt*(data.seatarg[0])+lcnt][2]==1) {
-                    td.className = "seat frontseat";
-                }
-                if (seating[rcnt*(data.seatarg[0])+lcnt][2]==2) {
-                    tag.className += " empty";
-                    name.className += " empty";
-                }
                 if (seating[rcnt*(data.seatarg[0])+lcnt][2]==3) {
                     td.className += " noseat";
+                    tag.className += " noseat";
+                    name.className += " noseat";
+                }
+                else if (seating[rcnt*(data.seatarg[0])+lcnt][0]=="Null") {
                     tag.className += " noseat";
                     name.className += " noseat";
                 }
@@ -280,8 +321,21 @@ function showresult(seating,data) {
         }
         table.appendChild(tr);
     }
-    document.getElementById("title").innerText = data.title;
+    document.getElementById("rarea").style.visibility = "visible";
+    document.getElementById("deftitle").value = replacetitle(data.title);
+    changetitle();
     document.getElementById("result").replaceWith(table);
+}
+
+function replacetitle(title) {
+    let date = new Date();
+    return title
+        .replace(/\%year\%/g, date.getFullYear())
+        .replace(/\%month\%/g, date.getMonth()+1)
+        .replace(/\%day\%/g, date.getDate())
+}
+function changetitle() {
+    document.getElementById("title").innerHTML = document.getElementById("deftitle").value;
 }
 
 </script>
@@ -321,6 +375,10 @@ function closepolicy() {
         padding: 2px;
     }
 
+    .fileinfo {
+        margin: 20px;
+    }
+
     div.control {
         background-color: rgba(173, 216, 230, 0.3);
         width: fit-content;
@@ -340,7 +398,6 @@ function closepolicy() {
     div.rresize {
         border-radius: 5px;
         display: block;
-        resize: both;
         overflow: hidden;
         width: 1000px;
         padding: 10px;
@@ -358,9 +415,6 @@ function closepolicy() {
         background-color: rgba(255, 235, 205, 0.079);
     }
 
-    td.frontseat {
-        background-color: beige;
-    }
     p.nomargin {
         margin: 0px;
         padding: 0px;
