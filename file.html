@@ -196,9 +196,47 @@ function makeseating(data) {
         console.error("not enough rear seats");
         return false;
     }
-    let seating = Array(data.seatarg[0]*data.seatarg[1]).fill([0,"空席",2]);
+    let seating = Array(data.seatarg[0]*data.seatarg[1]);
+    for (let i=0;i<seating.length;i++) {
+        seating[i] = ["Null","空席",data.seatarray[i]]
+    }
+    let frontadrs = []
+    let rearadrs = []
+    for (let i=0;i<data.seatarray.length;i++) {
+        if (data.seatarray[i]==1) {
+            frontadrs.push(i);
+        }
+        else if (data.seatarray[i]==0) {
+            rearadrs.push(i);
+        }
+    }
+    for (let p=0;p<data.front.length;p++) { // front seats
+        console.log(data.front[p])
+        while (true) {
+            let aadr = Math.floor(random()*frontadrs.length);
+            if (frontadrs[aadr]!=-1) {
+                seating[frontadrs[aadr]][0] = data.front[p][0];
+                seating[frontadrs[aadr]][1] = data.front[p][1];
+                frontadrs[aadr] = -1;
+                break;
+            }
+        }
+    }
+    for (let p=0;p<data.rear.length;p++) { // rear seats
+        console.log(data.rear[p])
+        while (true) {
+            let aadr = Math.floor(random()*rearadrs.length);
+            if (rearadrs[aadr]!=-1) {
+                seating[rearadrs[aadr]][0] = data.rear[p][0];
+                seating[rearadrs[aadr]][1] = data.rear[p][1];
+                rearadrs[aadr] = -1;
+                break;
+            }
+        }
+    }
+    console.log(frontadrs,rearadrs);
     console.log(seating);
-    showresult(seating,data)
+    showresult(seating,data);
 }
 
 
@@ -211,8 +249,7 @@ function showresult(seating,data) {
         let tr = document.createElement("tr");
         tr.className = "seat";
         for (let lcnt=0;lcnt<data.seatarg[0];lcnt++) {
-            let tseat = seating[rcnt*data.seatarg[0]+lcnt]
-            console.log(tseat)
+            let tseat = seating[rcnt*data.seatarg[0]+lcnt];
             seattag++;
             let td = document.createElement("td");
             let tag = document.createElement("p");
@@ -243,7 +280,7 @@ function showresult(seating,data) {
         }
         table.appendChild(tr);
     }
-    document.getElementById("title").innerText = data.title
+    document.getElementById("title").innerText = data.title;
     document.getElementById("result").replaceWith(table);
 }
 
@@ -316,17 +353,9 @@ function closepolicy() {
         border-radius: 5px;
         background-color: blanchedalmond;
     }
-    td.seat:hover {
-        padding: 2px 22px 8px 18px;
-        border: 1px solid rgb(56, 53, 44);
-    }
     td.seat.noseat {
         border: 1px solid rgba(255, 255, 255, 0);
         background-color: rgba(255, 235, 205, 0.079);
-    }
-    td.seat.noseat:hover {
-        padding: 2px 22px 8px 18px;
-        border: 1px solid rgb(174, 170, 158);
     }
 
     td.frontseat {
