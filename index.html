@@ -5,6 +5,7 @@
         <meta charset="utf-8">
         <meta name="description" content="席替えソフト">
         <script src="xorshift.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     </head>
     <body>
         <div class="noPrint control">
@@ -19,22 +20,27 @@
                 <input id="useseed" type="checkbox">
                 <input id="rseed" type="number" value="0">
             </div>
-            <div id="step2">
+            <div id="step3">
                 <button onclick="makeseating()">生成</button>
             </div>
-            <div id="step3">
+            <div id="step4">
                 タイトルを編集<br>
                 <input id="deftitle" type="text" onchange="changetitle()" onkeyup="changetitle()">
             </div>
-            <div id="step4">
-                <button onclick="print()">print</button>
+            <div id="step5">
+                <button onclick="print()">出力</button>
+            </div>
+            <div>
+                <button onclick="showusage()">使用方法</button>
+                <button onclick="showpolicy()">方針</button>
             </div>
             <div id="policy" style="visibility: hidden;">
                 <button onclick="closepolicy()" id="closepolicy">閉じる</button>
-                <div id="contents"></div>
+                <div id="policytext"></div>
             </div>
-            <div>
-                <button onclick="showpolicy()">方針</button>
+            <div id="usage" style="visibility: hidden;">
+                <button onclick="closeusage()" id="closeusage">閉じる</button>
+                <div id="usagetext"></div>
             </div>
         </div>
         <div class="noPrint fileinfo">
@@ -222,16 +228,11 @@ function loadfile(text) {
         retdatas.seatarray = seatarray;
     }
     {// member
-        let conf = blocksconf.member.split(",");
-        if (conf.indexOf("front")==-1) {
-            console.error("front member aren't defined");
-            return false;
-        }
         let frontmember = [];
         let rearmember = [];
         for (let i=0;i<blocks.member.length;i++) {
             let pdata = blocks.member[i].split(",");
-            let frontflag = Number(pdata[conf.indexOf("front")]);
+            let frontflag = Number(pdata[2]);
             if (frontflag==0) {
                 rearmember.push([pdata[0],pdata[1]]);
             }
@@ -377,37 +378,188 @@ function changetitle() {
 <script>
     
 let policy = `
-目標
-「公平かつ簡単な席替え」
-席替えはできる限り公平でなくてはならない
-しかし、公平にするためだとしても、面倒になるのはよくない
+# 目標「再現性の高い席替え」
+席替えで不正があってはならない  
 
-疑似乱数を用いて、非常にランダム かつ 検証もしやすい 席替えを目指しました
+1. 画面へのシード値の表示 及び シード値の指定 により、再現性を確保  
+2. ソースコードの公開により、誰でも検証が可能  
+
+データとシード値を用いて、実行結果を再現することができます  
+データとシード値に対する不正な操作さえ防げば、不正はできません  
+( データ: 名簿,席の並び,設定 )  
+`
+let usage = `
+# 使用方法
+
+## 1,データを書いたファイルを用意  
+データはテキストファイルです  
+
+\`\`\`
+; サンプルのデータ
+!template
+title,%month%月の席
+seed,165316
+useseed,0
+!seat 6x6
+311113
+000003
+000000
+000000
+000000
+000000
+!member
+1,佐藤,0
+2,鈴木,1
+3,高橋,0
+4,田中,1
+5,渡辺,0
+6,伊藤,1
+7,中村,1
+8,小林,0
+9,山本,0
+10,加藤,0
+11,吉田,0
+12,山田,0
+13,佐々木,0
+14,山口,0
+15,松本,0
+\`\`\`
+
+### 座席の定義  
+
+!seat の後ろに 横x縦 で席の並びの大きさを書きます
+\`!seat 横x縦\`
+その後ろに、席をひとつずつ書いていきます
+| 値 | 意味 |
+|-|-|
+| 0 | 後席 |
+| 1 | 前席 |
+| 2 | 空席 |
+| 3 | 席無し |
+
+(例  
+6x6の大きさ  
+前列が前席指定  
+前列の両端が席なし  
+\`\`\`
+!seat 6x6
+311113
+000003
+000000
+000000
+000000
+000000
+\`\`\`
+
+### 人の定義  
+!member と書きます
+\`!member\`
+その後ろに、個人を書いていきます  
+\`出席番号,名前,席\` のように書きます  
+- 席を0にすると、後ろ  
+- 席を1にすると、前  
+
+の席になります  
+
+(例  
+\`\`\`
+!member
+1,佐藤,0
+2,鈴木,1
+3,高橋,0
+4,田中,1
+\`\`\`
+
+### 読み込み時の設定
+設定をかきます
+
+!template と書きます
+\`!template\`
+その後ろに、設定を書いていきます
+
+(例  
+\`\`\`
+!template
+title,%month%月の席
+\`\`\`
+
+
+## 2,ファイルの読み込み
+画面左側にある「読み込み」ボタンを押します  
+ファイルの選択ダイアログが出るので、
+1で作ったファイルを選択して読み込みます  
+
+## 3,シード値の設定
+シード値と呼ばれる数値を使用して、出力を変えることができます  
+設定しないと、現在の時刻をシード値として使用します
+通常は使用しないので飛ばしてください  
+
+## 4, 生成
+「生成」ボタンを押すと、席が生成されます  
+
+## 5, 出力
+「出力」ボタンを押すと、印刷ダイアログが開きます  
+このダイアログを用いて座席のデータを出力することができます  
+
 `
 function showpolicy() {
-    let carea = document.getElementById("contents")
+    let carea = document.getElementById("policytext")
     document.getElementById("policy").style.visibility = "visible"
-    let scs = policy.split("\n")
-    for (let i=0;i<scs.length;i++) {
-        let pel = document.createElement("p")
-        pel.innerHTML = scs[i]
-        carea.appendChild(pel)
-    }
+    carea.innerHTML = marked.parse(policy);
 }
 function closepolicy() {
     document.getElementById("policy").style.visibility = "hidden"
-    let carea = document.getElementById("contents")
+    let carea = document.getElementById("policytext")
     carea.innerHTML = ""
 }
+function showusage() {
+    let carea = document.getElementById("usagetext")
+    document.getElementById("usage").style.visibility = "visible"
+    carea.innerHTML = marked.parse(usage);
+}
+function closeusage() {
+    document.getElementById("usage").style.visibility = "hidden"
+    let carea = document.getElementById("usagetext")
+    carea.innerHTML = ""
+}
+showusage()
 </script>
 <style>
     @media print{
         .noPrint{display:none;}
         @page{size: auto;margin: 0;}
     }
-    ul {
+    ul.notlist {
         list-style: none;
         padding: 2px;
+    }
+
+    code {
+        display: block;
+        width: fit-content;
+        min-width: 300px;
+        height: fit-content;
+        max-height: 150px;
+        overflow-y: scroll;
+        font-family: monospace;
+        background-color: rgba(255, 242, 199, 0.3);
+        padding: 6px;
+        border: 1px solid black;
+        border-radius: 10px;
+    }
+
+    td,th,table {
+        border: 1px solid rgba(48, 81, 81, 0.3);
+    }
+    thead {
+        background-color: rgba(216, 209, 209, 0.3);
+    }
+
+    .policytext,.usagetext {
+        font-family: serif;
+        height: 20px;
+        font-size: 15px;
+        margin: 5px;
     }
 
     .fileinfo {
@@ -432,6 +584,7 @@ function closepolicy() {
         padding: 2px;
         width: 100%;
         height: 100%;
+        border: none;
         table-layout: fixed;
     }
 
@@ -521,23 +674,27 @@ function closepolicy() {
         padding: 5px;
     }
 
-    #policy {
+    #policy,#usage {
         border: 1px solid gray;
         border-radius: 10px;
         background-color: rgba(238, 255, 250, 0.9);
         position: fixed;
         top: 100px;
         left: 100px;
-        padding: 20px;
+        padding: 30px;
         width: calc(100vw - 240px);
         height: calc(100vh - 240px);
         overflow: auto;
         box-shadow: 2px 2px 5px black;
     }
 
-    #closepolicy {
+    #closepolicy,#closeusage {
         width: fit-content;
+        height: 35px;
+        font-size: 13px;
         display: block;
         margin: 0 0 0 auto;
+        margin-top: -20px;
+        margin-right: -20px;
     }
 </style>
