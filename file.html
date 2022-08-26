@@ -166,6 +166,7 @@ function loadfile(text) {
         let conf = blocksconf.member.split(",");
         if (conf.indexOf("front")==-1) {
             console.error("front member aren't defined");
+            return false;
         }
         let frontmember = [];
         let rearmember = [];
@@ -182,12 +183,70 @@ function loadfile(text) {
         retdatas.front = frontmember;
         retdatas.rear = rearmember;
     }
-    console.log(retdatas)
-    makeseating(retdatas)
+    console.log(retdatas);
+    makeseating(retdatas);
 }
 
-function makeseating(retdatas) {
+function makeseating(data) {
+    if (data.frontseat<data.front.length) {
+        console.error("not enough front seats");
+        return false;
+    }
+    if (data.rearseat<data.rear.length) {
+        console.error("not enough rear seats");
+        return false;
+    }
+    let seating = Array(data.seatarg[0]*data.seatarg[1]).fill([0,"空席",2]);
+    console.log(seating);
+    showresult(seating,data)
 }
+
+
+function showresult(seating,data) {
+    let seattag = 0;
+    let table = document.createElement("table");
+    table.className = "seat";
+    table.id = "result";
+    for (let rcnt=0;rcnt<data.seatarg[1];rcnt++) {
+        let tr = document.createElement("tr");
+        tr.className = "seat";
+        for (let lcnt=0;lcnt<data.seatarg[0];lcnt++) {
+            let tseat = seating[rcnt*data.seatarg[0]+lcnt]
+            console.log(tseat)
+            seattag++;
+            let td = document.createElement("td");
+            let tag = document.createElement("p");
+            {
+                tag.className = "nomargin tag nopoint";
+                tag.innerHTML = tseat[0].toString();
+                td.appendChild(tag);
+                let name = document.createElement("p");
+                name.className = "nomargin name nopoint";
+                name.innerHTML = tseat[1];
+                td.appendChild(name);
+                td.className = "seat";
+                if (seating[rcnt*(data.seatarg[0])+lcnt][2]==1) {
+                    td.className = "seat frontseat";
+                }
+                if (seating[rcnt*(data.seatarg[0])+lcnt][2]==2) {
+                    tag.className += " empty";
+                    name.className += " empty";
+                }
+                if (seating[rcnt*(data.seatarg[0])+lcnt][2]==3) {
+                    td.className += " noseat";
+                    tag.className += " noseat";
+                    name.className += " noseat";
+                }
+            }
+            td.dataset.seatid = (rcnt*(data.seatarg[0]+1)+lcnt).toString();
+            tr.appendChild(td);
+        }
+        table.appendChild(tr);
+    }
+    document.getElementById("title").innerText = data.title
+    document.getElementById("result").replaceWith(table);
+}
+
 </script>
 <script>
     
@@ -294,6 +353,9 @@ function closepolicy() {
     }
     p.noseat {
         color: rgba(255, 255, 255, 0);
+    }
+    p.tag.noseat,empty {
+        visibility: hidden;
     }
     h1.title {
         width: fit-content;
