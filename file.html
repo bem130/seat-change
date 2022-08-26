@@ -41,6 +41,9 @@
     </body>
 </html>
 <script>
+
+random = Math.random; // 乱数の生成に用いる関数
+
 function localfile() {
     ifelm = document.createElement("input");
     ifelm.type = "file";
@@ -99,8 +102,6 @@ function loadfile(text) {
             blocks[nblock].push(ncdata[i]);
         }
     }
-    console.log(blocks);
-    console.log(blocksconf);
     {// template
         let bdata = {
             "title": "",
@@ -112,14 +113,15 @@ function loadfile(text) {
                 bdata[bdatas[0]] = bdatas[1];
             }
         }
-        console.log(bdata);
+        retdatas.title = bdata.title;
     }
     {// seat
         let seatarg = [0,0];
         let tseatarg = blocksconf.seat.split("x");
+        let frontseat = 0
+        let rearseat = 0
         seatarg[0] = Math.floor(Number(tseatarg[0]));
         seatarg[1] = Math.floor(Number(tseatarg[1]));
-        console.log(seatarg);
         let seatarray = new Uint8ClampedArray(seatarg[0]*seatarg[1]);
         if (seatarg[1]!=blocks.seat.length) {
             console.error("defined size doesn't match");
@@ -133,10 +135,32 @@ function loadfile(text) {
             }
             for (let x=0;x<seatarg[0];x++) {
                 let ii = i*seatarg[0]+x;
-                seatarray[ii] = Number(bdatas[ii]);
+                let tseat = Number(bdatas[x]);
+                switch (tseat) {
+                    case 0:
+                        rearseat++;
+                        seatarray[ii] = 0;
+                        break;
+                    case 1:
+                        frontseat++;
+                        seatarray[ii] = 1;
+                        break;
+                    case 2:
+                        seatarray[ii] = 2;
+                        break;
+                    case 3:
+                        seatarray[ii] = 3;
+                        break;
+                    default:
+                        console.error(`not defined seat ${bdatas[x]}`)
+                        break;
+                }
             }
         }
-        console.log(seatarray);
+        retdatas.frontseat = frontseat;
+        retdatas.rearseat = rearseat;
+        retdatas.seatarg = seatarg;
+        retdatas.seatarray = seatarray;
     }
     {// member
         let conf = blocksconf.member.split(",");
@@ -155,16 +179,25 @@ function loadfile(text) {
                 frontmember.push([pdata[0],pdata[1]]);
             }
         }
-        console.log(frontmember,rearmember);
+        retdatas.front = frontmember;
+        retdatas.rear = rearmember;
     }
+    console.log(retdatas)
+    makeseating(retdatas)
 }
 
+function makeseating(retdatas) {
+}
 </script>
 <script>
     
 let policy = `
 目標
-「公平で再現可能な席替え」
+「公平かつ簡単な席替え」
+席替えはできる限り公平でなくてはならない
+しかし、公平にするためだとしても、面倒になるのはよくない
+
+疑似乱数を用いて、非常にランダム かつ 検証もしやすい 席替えを目指しました
 `
 function showpolicy() {
     let carea = document.getElementById("contents")
