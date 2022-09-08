@@ -131,7 +131,7 @@ async function samplefile() {
 
 function loadfile(text) {
     let retdatas = {};
-    let data = text.split("\r\n");
+    let data = text.replace(/\r/g,"").split("\n");
     let ncdata = [];
     for (let i=0;i<data.length;i++) {
         if (data[i][0]!=";") {
