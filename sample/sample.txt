@@ -3,7 +3,7 @@
 title,%month%月の席
 seed,165316
 useseed,0
-!seat 5x4
+!seat
 ; -:席がない
 ; 0:空席指定
 ; 1:グループ1

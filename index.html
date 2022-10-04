@@ -138,31 +138,23 @@ function loadfile(text) {
         "nsc": [],
         "template": [],
         "seat": [],
+        "group":[],
         "member": [],
-    }
-    let blocksconf = {
-        "nsc": "",
-        "template": "",
-        "seat": "",
-        "member": "",
     }
     let blocksname = Object.keys(blocks);
     let nblock = "";
-    let nblockconf = "";
     for (let i=0;i<ncdata.length;i++) {
         if (ncdata[i][0]=="!") {
-            let tblock = ncdata[i].slice(1).split(" ");
-            nblock = tblock[0];
-            nblockconf = tblock[1];
-            if (nblockconf!=null&&nblockconf.length>0&&blocksname.indexOf(nblock)!=-1) {
-                blocksconf[nblock] = nblockconf;
-            }
-            continue;
+            let tblock = ncdata[i].slice(1);
+            nblock = tblock;
         }
-        if (blocksname.indexOf(nblock)!=-1) {
+        else {
+            console.log(nblock)
             blocks[nblock].push(ncdata[i]);
         }
+        console.log(nblock)
     }
+    console.log(blocks)
     {// template
         let bdata = {
             "title": "",
@@ -178,11 +170,9 @@ function loadfile(text) {
     }
     {// seat
         let seatarg = [0,0];
-        let tseatarg = blocksconf.seat.split("x");
+        console.log(blocks)
         let frontseat = 0;
         let rearseat = 0;
-        seatarg[0] = Math.floor(Number(tseatarg[0]));
-        seatarg[1] = Math.floor(Number(tseatarg[1]));
         let seatarray = new Uint8ClampedArray(seatarg[0]*seatarg[1]);
         if (seatarg[1]!=blocks.seat.length) {
             console.error("defined size doesn't match");
