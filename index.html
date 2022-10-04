@@ -152,9 +152,7 @@ function loadfile(text) {
             console.log(nblock)
             blocks[nblock].push(ncdata[i]);
         }
-        console.log(nblock)
     }
-    console.log(blocks)
     {// template
         let bdata = {
             "title": "",
@@ -168,12 +166,13 @@ function loadfile(text) {
         }
         retdatas.title = bdata.title;
     }
+    console.log(blocks)
     {// seat
         let seatarg = [0,0];
-        console.log(blocks)
-        let frontseat = 0;
-        let rearseat = 0;
+        seatarg[1] = blocks.seat.length;
+        seatarg[0] = blocks.seat[0].length;
         let seatarray = new Uint8ClampedArray(seatarg[0]*seatarg[1]);
+        let groups = {};
         if (seatarg[1]!=blocks.seat.length) {
             console.error("defined size doesn't match");
             return false;
@@ -186,34 +185,19 @@ function loadfile(text) {
             }
             for (let x=0;x<seatarg[0];x++) {
                 let ii = i*seatarg[0]+x;
+                let tseat = Number(bdatas[x]);
                 if (bdatas[x]=="-") {
-                    seatarray[ii] = -1;
+                    tseat = -1;
                 }
-                else {
-                    let tseat = Number(bdatas[x]);
-                    switch (tseat) {
-                        case 0:
-                            rearseat++;
-                            break;
-                        case 1:
-                            frontseat++;
-                            seatarray[ii] = 1;
-                            break;
-                        case 2:
-                            seatarray[ii] = 2;
-                            break;
-                        case 3:
-                            seatarray[ii] = 3;
-                            break;
-                        default:
-                            console.error(`not defined seat ${bdatas[x]}`)
-                            break;
-                    }
+                if (groups[tseat]==null) {
+                    groups[tseat]=0;
                 }
+                groups[tseat]++;
+                seatarray[ii] = tseat;
             }
         }
-        retdatas.frontseat = frontseat;
-        retdatas.rearseat = rearseat;
+        console.log(seatarray,groups)
+        retdatas.groups = groups;
         retdatas.seatarg = seatarg;
         retdatas.seatarray = seatarray;
     }
@@ -241,6 +225,7 @@ function showdata(data) {
     document.getElementById("infotitle").innerHTML = `${data.title}`;
     document.getElementById("infoseatarg").innerHTML = `${data.seatarg[0]}x${data.seatarg[1]}`;
     document.getElementById("infopeople").innerHTML = `${data.front.length+data.rear.length}`;
+    document.getElementById("infogroupname").innerHTML = `${Object.keys(data.groups)}`;
 }
 
 function makereport(data) {
