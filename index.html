@@ -58,12 +58,8 @@
                     <td id="infopeople"></td>
                 </tr>
                 <tr>
-                    <td>前の人の数</td>
-                    <td id="infopeoplefront"></td>
-                </tr>
-                <tr>
-                    <td>後ろの人の数</td>
-                    <td id="infopeoplerear"></td>
+                    <td>グループ</td>
+                    <td id="infogroupname"></td>
                 </tr>
             </table>
         </div>
@@ -142,28 +138,18 @@ function loadfile(text) {
         "nsc": [],
         "template": [],
         "seat": [],
+        "group":[],
         "member": [],
-    }
-    let blocksconf = {
-        "nsc": "",
-        "template": "",
-        "seat": "",
-        "member": "",
     }
     let blocksname = Object.keys(blocks);
     let nblock = "";
-    let nblockconf = "";
     for (let i=0;i<ncdata.length;i++) {
         if (ncdata[i][0]=="!") {
-            let tblock = ncdata[i].slice(1).split(" ");
-            nblock = tblock[0];
-            nblockconf = tblock[1];
-            if (nblockconf!=null&&nblockconf.length>0&&blocksname.indexOf(nblock)!=-1) {
-                blocksconf[nblock] = nblockconf;
-            }
-            continue;
+            let tblock = ncdata[i].slice(1);
+            nblock = tblock;
         }
-        if (blocksname.indexOf(nblock)!=-1) {
+        else {
+            console.log(nblock)
             blocks[nblock].push(ncdata[i]);
         }
     }
@@ -180,14 +166,13 @@ function loadfile(text) {
         }
         retdatas.title = bdata.title;
     }
+    console.log(blocks)
     {// seat
         let seatarg = [0,0];
-        let tseatarg = blocksconf.seat.split("x");
-        let frontseat = 0
-        let rearseat = 0
-        seatarg[0] = Math.floor(Number(tseatarg[0]));
-        seatarg[1] = Math.floor(Number(tseatarg[1]));
+        seatarg[1] = blocks.seat.length;
+        seatarg[0] = blocks.seat[0].length;
         let seatarray = new Uint8ClampedArray(seatarg[0]*seatarg[1]);
+        let groups = {};
         if (seatarg[1]!=blocks.seat.length) {
             console.error("defined size doesn't match");
             return false;
@@ -201,47 +186,33 @@ function loadfile(text) {
             for (let x=0;x<seatarg[0];x++) {
                 let ii = i*seatarg[0]+x;
                 let tseat = Number(bdatas[x]);
-                switch (tseat) {
-                    case 0:
-                        rearseat++;
-                        seatarray[ii] = 0;
-                        break;
-                    case 1:
-                        frontseat++;
-                        seatarray[ii] = 1;
-                        break;
-                    case 2:
-                        seatarray[ii] = 2;
-                        break;
-                    case 3:
-                        seatarray[ii] = 3;
-                        break;
-                    default:
-                        console.error(`not defined seat ${bdatas[x]}`)
-                        break;
+                if (bdatas[x]=="-") {
+                    tseat = -1;
                 }
+                if (groups[tseat]==null) {
+                    groups[tseat]=0;
+                }
+                groups[tseat]++;
+                seatarray[ii] = tseat;
             }
         }
-        retdatas.frontseat = frontseat;
-        retdatas.rearseat = rearseat;
+        console.log(seatarray,groups)
+        retdatas.groups = groups;
         retdatas.seatarg = seatarg;
         retdatas.seatarray = seatarray;
     }
     {// member
-        let frontmember = [];
-        let rearmember = [];
+        let members = [];
         for (let i=0;i<blocks.member.length;i++) {
             let pdata = blocks.member[i].split(",");
             let frontflag = Number(pdata[2]);
-            if (frontflag==0) {
-                rearmember.push([pdata[0],pdata[1]]);
+            if (members[frontflag]==null) {
+                members[frontflag] = [];
             }
-            else if (frontflag==1) {
-                frontmember.push([pdata[0],pdata[1]]);
-            }
+            members[frontflag].push([pdata[0],pdata[1]]);
         }
-        retdatas.front = frontmember;
-        retdatas.rear = rearmember;
+        console.log(members)
+        retdatas.members = members;
     }
     filedata = retdatas;
     showdata(filedata);
@@ -250,9 +221,8 @@ function loadfile(text) {
 function showdata(data) {
     document.getElementById("infotitle").innerHTML = `${data.title}`;
     document.getElementById("infoseatarg").innerHTML = `${data.seatarg[0]}x${data.seatarg[1]}`;
-    document.getElementById("infopeople").innerHTML = `${data.front.length+data.rear.length}`;
-    document.getElementById("infopeoplefront").innerHTML = `${data.front.length}`;
-    document.getElementById("infopeoplerear").innerHTML = `${data.rear.length}`;
+    //document.getElementById("infopeople").innerHTML = `${data.members.length}`;
+    document.getElementById("infogroupname").innerHTML = `${Object.keys(data.groups)}`;
 }
 
 function makereport(data) {
@@ -270,47 +240,28 @@ function makeseating() {
         console.error("no file loaded");
         return false;
     }
-    if (data.frontseat<data.front.length) {
-        console.error("not enough front seats");
-        return false;
-    }
-    if (data.rearseat<data.rear.length) {
-        console.error("not enough rear seats");
-        return false;
-    }
     let seating = Array(data.seatarg[0]*data.seatarg[1]);
     for (let i=0;i<seating.length;i++) {
         seating[i] = ["Null","空席",data.seatarray[i]];
     }
-    let frontadrs = []
-    let rearadrs = []
+    let seatadrs = []
     for (let i=0;i<data.seatarray.length;i++) {
-        if (data.seatarray[i]==1) {
-            frontadrs.push(i);
+        if (seatadrs[data.seatarray]==null) {
+            seatadrs[data.seatarray] = [];
         }
-        else if (data.seatarray[i]==0) {
-            rearadrs.push(i);
-        }
+        seatadrs[data.seatarray].push(i);
     }
-    for (let p=0;p<data.front.length;p++) { // front seats
-        while (true) {
-            let aadr = Math.floor(random()*frontadrs.length);
-            if (frontadrs[aadr]!=-1) {
-                seating[frontadrs[aadr]][0] = data.front[p][0];
-                seating[frontadrs[aadr]][1] = data.front[p][1];
-                frontadrs[aadr] = -1;
-                break;
-            }
-        }
-    }
-    for (let p=0;p<data.rear.length;p++) { // rear seats
-        while (true) {
-            let aadr = Math.floor(random()*rearadrs.length);
-            if (rearadrs[aadr]!=-1) {
-                seating[rearadrs[aadr]][0] = data.rear[p][0];
-                seating[rearadrs[aadr]][1] = data.rear[p][1];
-                rearadrs[aadr] = -1;
-                break;
+    for (let dc=0;dc<Object.keys(data.members).length;dc++) {
+        let group = data.members[Object.keys(data.members)[dc]];
+        for (let p=0;p<group.length;p++) { // front seats
+            while (true) {
+                let aadr = Math.floor(random()*group.length);
+                if (group[aadr]!=-1) {
+                    seating[group[aadr]][0] = group[p][0];
+                    seating[group[aadr]][1] = group[p][1];
+                    group[aadr] = -1;
+                    break;
+                }
             }
         }
     }
